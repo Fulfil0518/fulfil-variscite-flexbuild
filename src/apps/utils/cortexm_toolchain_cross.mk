@@ -1,6 +1,27 @@
+# Copyright 2025 Variscite Ltd.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# Target: cortexm_toolchain_cross
+#
+# Description:
+#   Download and install the GCC toolchain for Cortex-M (arm-none-eabi),
+#   required for building FreeRTOS and other embedded components.
+#
+# Variables:
+#   CM_GCC - Toolchain version to be used (e.g., "12.3.rel1").
+#            If it contains "rel", the binary release is downloaded
+#            from the ARM Keil repository.
+#            Otherwise, the gnu-rm package is downloaded from
+#            developer.arm.com.
+#   CORTEXM_TOOLCHAIN_SUPPORT - If set to "false", this rule will exit without running.
+
 CM_GCC ?= "12.3.rel1"
 
+CORTEXM_TOOLCHAIN_SUPPORT ?= true
+
 cortexm_toolchain_cross:
+	@[ $(CORTEXM_TOOLCHAIN_SUPPORT) = false ] && exit || \
 	$(call fbprint_b,"cortexm_toolchain_cross") && \
 	set -x && \
 	if [ ! -d $(PKGDIR)/apps/utils/cortexm_toolchain_cross ]; then \
