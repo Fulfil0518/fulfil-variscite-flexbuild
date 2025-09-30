@@ -24,7 +24,7 @@ jobs:
   build-flexbuild:
     # Skip the entire job if the repository is private
     if: github.event.repository.private == false
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     strategy:
       matrix:
@@ -51,6 +51,12 @@ jobs:
           sudo rm -rf "$GITHUB_WORKSPACE"
           sudo ln -s /mnt/work "$GITHUB_WORKSPACE"
           sudo chown -R $USER:$USER /mnt/work
+
+      - name: Refresh APT and install flexbuild deps
+        run: |
+          sudo apt-get update -yqq
+          sudo apt-get install -yqq --no-install-recommends \
+            binfmt-support qemu-system-common qemu-user-static
 
       - name: Checkout code
         uses: actions/checkout@v4

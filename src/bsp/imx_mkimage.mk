@@ -100,7 +100,7 @@ define imx_mkimage_target
     $(MAKE) SOC=$$SOC_FAMILY mkimage_imx8 && \
     \
     bl32=$(PKGDIR)/apps/security/optee_os/out/arm-plat-imx/core/tee_$$brd.bin && \
-    if [ $(CONFIG_OPTEE) = y -a ! -f $$bl32 ]; then \
+    if [ "$(CONFIG_OPTEE)" = y -a ! -f $$bl32 ]; then \
 	CONFIG_OPTEE=y bld optee_os -m $$brd; \
     fi && \
     [ $${MACHINE:0:7} = imx8ulp ] && plat=$${MACHINE:0:7} || plat=$${MACHINE:0:6} && \

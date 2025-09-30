@@ -61,7 +61,10 @@ linux:
 	$(MAKE) -j$(JOBS) modules -C $(KERNEL_PATH) O=$$opdir && \
 	$(MAKE) -j$(JOBS) modules_install INSTALL_MOD_PATH=$$opdir/tmp -C $(KERNEL_PATH) O=$$opdir && \
 	for dtb in $(KERNEL_DEVICETREE); do \
-		cp $$opdir/arch/$(DESTARCH)/boot/dts/$$dtb $(FBOUTDIR)/linux/$(KERNEL_TREE)/$(DESTARCH)/$(SOCFAMILY); \
+		src="$$opdir/arch/$(DESTARCH)/boot/dts/$$dtb"; \
+		dst="$(FBOUTDIR)/linux/$(KERNEL_TREE)/$(DESTARCH)/$(SOCFAMILY)"; \
+		[ -f "$$src" ] || { $(call fbprint_e,DTB not found: $$src); exit 1; }; \
+		cp "$$src" "$$dst" || { $(call fbprint_e,Copy failed: $$src -> $$dst); exit 1; }; \
 	done; \
 	if [ $$MACHINE = imx8qxp-var-som ];  then \
 	    ln -s $(FBOUTDIR)/linux/$(KERNEL_TREE)/$(DESTARCH)/$(SOCFAMILY)/imx8qxp-var-som-symphony-sd.dtb $(FBOUTDIR)/linux/$(KERNEL_TREE)/$(DESTARCH)/$(SOCFAMILY)/imx8qxp-var-som-symphony.dtb; \

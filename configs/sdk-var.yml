@@ -166,7 +166,7 @@ repo:
 # kernel and modules git repositories
   linux:
     url:  https://github.com/varigit/linux-imx.git
-    commit:  168ca6166204bd24090dffe5d4047d0c202e8d30
+    commit:  dcd40b29dfc74b00a9542d9be0f98cd040f7d214
 
   cryptodev_linux:
     url:  https://github.com/cryptodev-linux/cryptodev-linux.git
@@ -431,7 +431,7 @@ repo:
 
   meta_variscite_sdk_common:
     url: https://github.com/varigit/meta-variscite-sdk-common.git
-    commit: 4d5d532cb9e8f7fa3f677d2d0e4b256a277ed5b2
+    commit: 7967f8724ead496345720d06ecc23891c237671d
 
 # generic component repositories
   imx_test:

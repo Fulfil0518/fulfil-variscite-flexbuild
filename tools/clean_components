@@ -8,6 +8,9 @@
 clean_bsp_components() {
     rm -rf $FBOUTDIR/bsp
     rm -rf $PKGDIR/bsp/atf/build
+    rm -rf $PKGDIR/bsp/oei
+    rm -rf $PKGDIR/bsp/sm
+    rm -rf $PKGDIR/bsp/imx_mkimage
 
     [ -d $PKGDIR/bsp/rcw ] && \
     $MAKE clean -C $PKGDIR/bsp/rcw 2>/dev/null
