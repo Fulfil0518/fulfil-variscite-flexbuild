@@ -1,0 +1,100 @@
+# Robot controller deployment
+apiVersion: apps/v1
+kind: Deployment
+# Metadata defines the name of the deployment and allows us to define arbitrary
+# labels to attach to it.
+metadata:
+  name: robot-controller
+  namespace: cloud-robotics
+  labels:
+    app.kubernetes.io/name: robot-controller
+# The spec defines the parameters of a firmware deployment.
+spec:
+  # Deployments can allow multiple instances of a container to run.
+  # For firmware, we usually will only want one instance running.
+  replicas: 1
+  # The selector is a list of labels that need to match for this deployment
+  # to manage containers. Generally you should always set these labels to the
+  # labels defined in the 'template' section.
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: robot-controller
+  # Strategy defines how we should manage upgrading the firmware container.
+  # https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+  strategy:
+    type: Recreate
+  # Template defines the properties of a single instance of a firmware container.
+  template:
+    # Metadata defines the name of the firmware container, and allows us to add
+    # arbitrary labels. Note that we must also include labels from the 'selector'
+    # section here.
+    metadata:
+      name: robot-controller
+      labels:
+        app.kubernetes.io/name: robot-controller
+    spec:
+      # Use the robot-controller service account to get access to Kubernetes
+      # resources from inside the container
+      serviceAccountName: robot-controller
+      # If true, we don't use any network isolation.
+      #hostNetwork: true
+      # If the container crashes, should we try to automatically restart the
+      # container?
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      imagePullSecrets:
+        - name: gcr-key
+      containers:
+        - name: state-syncronizer
+          # What docker image should run for this firmware deployment
+          image: gcr.io/fulfil-fulfillment/robot-controller:latest
+          # Whether or not we should always try to pull the latest version of
+          # the given image.
+          imagePullPolicy: Always
+          # The command to run inside the container
+          command:
+            - "/entrypoint"
+          # Enviornment variables to pass to the container
+          env:
+            - name: POLL_INTERVAL_SECS
+              value: "30"
+            - name: PRIORITY
+              value: "19"
+            - name: KUBE_CONFIG
+              value: /kube/config
+            - name: KUBE_NAMESPACE
+              value: default
+            - name: SYNC_URL
+              value: https://robotics.np-fulfil-api.com/sync
+            - name: LOCK_SOCKET
+              value: /tmp/robot-controller/lock.socket
+          # Defines escalated privileges the container should have.
+          securityContext:
+            capabilities:
+              add:
+                - SYS_NICE
+            #privileged: true
+          # This pod runs in the Burstable QoS class
+          resources:
+            requests:
+              memory: "16Mi"
+              cpu: "10m"
+            limits:
+              memory: "128Mi"
+              cpu: "50m"
+          # Defines what volumes should be mounted inside the container. Note
+          # that there should be a corresponding 'volume' definition in the
+          # section below
+          volumeMounts:
+            - mountPath: /tmp
+              name: lock-folder
+            - mountPath: /kube/config
+              name: kubeconfig
+      # Volumes that are available to be used in the 'volumeMounts' section
+      volumes:
+        - hostPath:
+            path: /tmp
+          name: lock-folder
+        - hostPath:
+            path: /etc/rancher/k3s/k3s.yaml
+          name: kubeconfig

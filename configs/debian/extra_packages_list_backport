@@ -18,4 +18,20 @@ extra_desktop_devel_packages_backport=" \
     libgpiod-dev \
     python3-libgpiod \
     python3-venv \
+    apt-transport-https \
+    ca-certificates \
+	curl \
+	gnupg \
+	lsb-release \
+	wpasupplicant \
+	sudo \
+    nano \
+	htop \
+	net-tools \
+	ntp \
+	ccze \
+	usbutils \
+	rsync \
+	rsyslog \
+    ngrok
 "

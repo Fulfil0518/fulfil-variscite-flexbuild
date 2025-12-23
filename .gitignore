@@ -10,4 +10,6 @@ tools/bld
 *.tar.zst
 *.log
 *.o
-
+# Ignore secrets files
+rover-gcr-api-key.json
+rover-gcr-secret.yaml

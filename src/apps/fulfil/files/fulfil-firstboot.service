@@ -1,0 +1,10 @@
+[Unit]
+Description=First Boot Bootstrapping Script
+ConditionPathExists=/usr/local/bin/firstboot.sh
+
+[Service]
+EnvironmentFile=/etc/environment
+Type=oneshot
+ExecStart=/usr/local/bin/firstboot.sh
+TimeoutSec=300
+Restart=on-abnormal
