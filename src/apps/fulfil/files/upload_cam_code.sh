@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 echo 'WARNING: this will only work for the last usb mass storage device'
 echo
@@ -16,9 +17,11 @@ if [ $? -eq 0 ]; then
     cp main.py /media/usb/
     umount /media/usb/
     echo "files sent"
+    rm -f /etc/systemd/system/multi-user.target.wants/fulfil-camera-install.service \
+        /etc/systemd/system/fulfil-camera-install.service
+    systemctl daemon-reload
     exit 0
 else
-    echo " $DEV not Mounted"
+    echo "$DEV not Mounted"
     exit 1
 fi
-

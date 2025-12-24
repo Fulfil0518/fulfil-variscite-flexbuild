@@ -155,7 +155,6 @@ for label in ${CONF_NODE_LABELS}; do
 done
 
 # set up a bunch of stuff for lfrs and ease of use for devs
-mkdir -p /run/promtail #for promtail to work
 echo "export currentlog=/home/usrFtp/code/log_\$(date "'+%Y-%m-%d'").txt" >> ~/.bashrc
 echo 'imx_rpmsg_tty' >> /etc/modules
 rm /etc/bluetooth/variscite-bt
@@ -163,9 +162,8 @@ fw_setenv fdt_file imx8mn-var-som-fulfil-lfp.dtb
 
 # Remove firstboot bootstrap script
 echo "Removing firstboot script..."
-rm /usr/local/bin/firstboot.sh
+rm /opt/fulfil/firstboot.sh
 rm /etc/systemd/system/default.target.wants/firstboot.service
-bash ~/upload_cam_code.sh
 
 # Shutdown
 echo "Shutting down..."

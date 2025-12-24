@@ -1,10 +1,12 @@
 [Unit]
 Description=Camera Install Script
-ConditionPathExists=/usr/local/bin/camera_install.sh
+ConditionPathExists=/opt/fulfil/camera_install.sh
+Wants=network-online.target
+After=network-online.target
+
 
 [Service]
 EnvironmentFile=/etc/environment
 Type=oneshot
-ExecStart=/usr/local/bin/camera_install.sh
+ExecStart=/opt/fulfil/camera_install.sh
 TimeoutSec=300
-Restart=on-abnormal

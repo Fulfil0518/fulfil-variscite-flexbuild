@@ -1,7 +1,10 @@
 #!/bin/bash
-# This script is designed to run when a newly provisioned node first comes
-# online. This script will setup networking, define the hostname, etc. which
-# are unique to a given node.
 set -x
 
-bash ~/upload_cam_code.sh
+bash /opt/fulfil/upload_cam_code.sh
+# if the upload script worked, remove this service file and reload systemd
+if [ $? -eq 0 ]; then
+    rm -f /etc/systemd/system/multi-user.target.wants/fulfil-camera-install.service \
+        /etc/systemd/system/fulfil-camera-install.service
+    systemctl daemon-reload
+fi
