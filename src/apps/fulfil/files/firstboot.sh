@@ -91,6 +91,8 @@ apt-get install -y apt-transport-https \
 	rsync \
 	rsyslog
 
+bash /opt/fulfil/ngrok_setup.sh
+
 touch /etc/rsyslog.d/excluderover.conf
 echo "if \$programname contains \"rover-bag3-core\" then stop" > /etc/rsyslog.d/excluderover.conf
 
@@ -167,7 +169,7 @@ done
 FULFILDIR=/opt/fulfil/
 
 # copy over necessary lfr files
-mkdir -p ${MOUNTDIR}/home/usrFtp/code
+mkdir -p /home/usrFtp/code
 cp ${FULFILDIR}/rpmsg_adc.elf /lib/firmware/
 cp ${FULFILDIR}/main.py /root/
 cp ${FULFILDIR}/upload_cam_code.sh /root/
@@ -193,6 +195,7 @@ echo "export currentlog=/home/usrFtp/code/log_\$(date "'+%Y-%m-%d'").txt" >> ~/.
 echo 'imx_rpmsg_tty' >> /etc/modules
 rm /etc/bluetooth/variscite-bt
 fw_setenv fdt_file imx8mn-var-som-fulfil-lfp.dtb 
+mv /opt/fulfil/lfp-core /home/usrFtp/code/
 
 # Remove firstboot bootstrap script
 echo "Removing firstboot script..."

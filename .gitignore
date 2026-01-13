@@ -15,3 +15,4 @@ rover-gcr-api-key.json
 rover-gcr-secret.yaml
 lfr-promtail-secret.yaml
 wifi-secrets.env
+ngrok.yml
