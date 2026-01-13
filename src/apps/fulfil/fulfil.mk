@@ -25,8 +25,12 @@ app-$(APP_NAME):
 		$(RFSDIR)/etc/systemd/system/multi-user.target.wants/fulfil-firstboot.service
 
 	# 5. Install and enable the camera service
+	install -m 0755 $(CURDIR)/fulfil/files/upload_cam_code.sh \
+		$(RFSDIR)/opt/fulfil/upload_cam_code.sh
+
 	install -m 0644 $(CURDIR)/fulfil/files/fulfil-camera-install.service \
 		$(RFSDIR)/etc/systemd/system/fulfil-camera-install.service
+
 	ln -sf /etc/systemd/system/fulfil-camera-install.service \
 		$(RFSDIR)/etc/systemd/system/multi-user.target.wants/fulfil-camera-install.service
 
