@@ -1,6 +1,8 @@
 [Unit]
 Description=First Boot Bootstrapping Script
 ConditionPathExists=/opt/fulfil/firstboot.sh
+#so we ignore when running on sd card
+ConditionPathExists=!/usr/bin/install_debian.sh
 
 [Service]
 EnvironmentFile=/etc/environment
