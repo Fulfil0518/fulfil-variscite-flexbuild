@@ -116,7 +116,6 @@ if [ ! -f /usr/bin/docker ]; then
 	curl -fsSL https://get.docker.com | sh
 fi
 
-cat ~/manifests/rover-gcr-api-key.json | docker login -u _json_key --password-stdin https://gcr.io
 
 # if the environment variable BOT_NUMBER exists set hostname to that
 if [[ -n "$BOT_NUMBER" ]]
@@ -186,6 +185,9 @@ cp ${FULFILDIR}/rover-gcr-secret.yaml /var/lib/rancher/k3s/server/manifests/2-gc
 cp ${FULFILDIR}/rover-gcr-api-key.json /root/
 cp ${FULFILDIR}/lfr-promtail-secret.yaml /var/lib/rancher/k3s/server/manifests/4-lfr-promtail-secret.yaml
 
+# docker login to gcr.io so that k3s can pull images
+cat /root/rover-gcr-api-key.json | docker login -u _json_key --password-stdin https://gcr.io
+
 # set up a bunch of stuff for lfrs and ease of use for devs
 echo "export currentlog=/home/usrFtp/code/log_\$(date "'+%Y-%m-%d'").txt" >> ~/.bashrc
 echo 'imx_rpmsg_tty' >> /etc/modules
@@ -196,6 +198,7 @@ fw_setenv fdt_file imx8mn-var-som-fulfil-lfp.dtb
 echo "Removing firstboot script..."
 rm /opt/fulfil/firstboot.sh
 rm /etc/systemd/system/default.target.wants/firstboot.service
+systemctl disable k3s.service # disable k3s to be re-enabled later by us once at TAN
 
 # Shutdown
 echo "Shutting down..."

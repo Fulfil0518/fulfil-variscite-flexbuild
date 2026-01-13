@@ -1,0 +1,11 @@
+[Unit]
+Description=Rover LFP1 Core Firmware
+
+[Service]
+Type=simple
+ExecStartPre=/bin/sleep 5
+ExecStart=/home/usrFtp/code/lfp-core
+Environment="LOGTRACE=0"
+
+[Install]
+WantedBy=multi-user.target
