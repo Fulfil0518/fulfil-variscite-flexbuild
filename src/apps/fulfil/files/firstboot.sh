@@ -24,14 +24,25 @@ ap_scan=1
 fast_reauth=1
 EOL
 
-# First Network (Pioneer)
-wpa_passphrase "IoT" "FastWifiPackets" >> /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
+WIFI_SECRETS_FILE="/opt/fulfil/wifi-secrets.env"
+if [ -f "$WIFI_SECRETS_FILE" ]; then
+	# shellcheck source=/opt/fulfil/wifi-secrets.env
+	. "$WIFI_SECRETS_FILE"
+else
+	echo "Missing $WIFI_SECRETS_FILE; skipping WiFi provisioning"
+fi
 
-# Second Network (Vexos)
-wpa_passphrase "Fulfil50" "fulfil123" >> /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
+add_wifi_network() {
+	local ssid="$1"
+	local psk="$2"
+	if [ -n "$ssid" ] && [ -n "$psk" ]; then
+		wpa_passphrase "$ssid" "$psk" >> /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
+	fi
+}
 
-# Second Network (TAN)
-wpa_passphrase "TAN_SSID" "TAN_PASSWORD" >> /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
+add_wifi_network "${WIFI_SSID_1:-}" "${WIFI_PSK_1:-}"
+add_wifi_network "${WIFI_SSID_2:-}" "${WIFI_PSK_2:-}"
+add_wifi_network "${WIFI_SSID_3:-}" "${WIFI_PSK_3:-}"
 
 networkctl up wlan0
 

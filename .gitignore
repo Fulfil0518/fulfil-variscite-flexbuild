@@ -13,3 +13,4 @@ tools/bld
 # Ignore secrets files
 rover-gcr-api-key.json
 rover-gcr-secret.yaml
+wifi-secrets.env
