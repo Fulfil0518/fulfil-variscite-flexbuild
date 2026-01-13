@@ -154,6 +154,27 @@ for label in ${CONF_NODE_LABELS}; do
 	sed -i "s/--docker' \\\/--docker' \\\\\n\t'--node-label' ${label} \\\/g" /etc/systemd/system/k3s.service
 done
 
+FULFILDIR=/opt/fulfil/
+
+# copy over necessary lfr files
+mkdir -p ${MOUNTDIR}/home/usrFtp/code
+cp ${FULFILDIR}/rpmsg_adc.elf /lib/firmware/
+cp ${FULFILDIR}/main.py /root/
+cp ${FULFILDIR}/upload_cam_code.sh /root/
+
+# Copy the robot-controller kubernetes manifests for firmware management.
+# This will automatically be applied when k3s starts.
+# https://rancher.com/docs/k3s/latest/en/advanced/
+mkdir -p /var/lib/rancher/k3s/server/manifests
+cp ${FULFILDIR}/namespace.yaml /var/lib/rancher/k3s/server/manifests/0-namespace.yaml
+cp ${FULFILDIR}/serviceaccount.yaml /var/lib/rancher/k3s/server/manifests/1-serviceaccount.yaml
+cp ${FULFILDIR}/deployment.yaml /var/lib/rancher/k3s/server/manifests/3-deployment.yaml
+
+# note these three lines require secrets which you'll have to create and put in the scripts/manifests directory
+cp ${FULFILDIR}/rover-gcr-secret.yaml /var/lib/rancher/k3s/server/manifests/2-gcr-key.yaml
+cp ${FULFILDIR}/rover-gcr-api-key.json /root/
+cp ${FULFILDIR}/lfr-promtail-secret.yaml /var/lib/rancher/k3s/server/manifests/4-lfr-promtail-secret.yaml
+
 # set up a bunch of stuff for lfrs and ease of use for devs
 echo "export currentlog=/home/usrFtp/code/log_\$(date "'+%Y-%m-%d'").txt" >> ~/.bashrc
 echo 'imx_rpmsg_tty' >> /etc/modules
