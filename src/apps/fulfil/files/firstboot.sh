@@ -49,6 +49,8 @@ networkctl up wlan0
 systemctl restart systemd-networkd.service
 systemctl restart wpa_supplicant@wlan0.service
 
+systemctl enable wpa_supplicant@wlan0.service
+
 # Wait for network to come up
 sleep 30
 
