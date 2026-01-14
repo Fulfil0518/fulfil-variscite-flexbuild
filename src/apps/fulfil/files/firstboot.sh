@@ -197,7 +197,7 @@ echo "export currentlog=/home/usrFtp/code/log_\$(date "'+%Y-%m-%d'").txt" >> ~/.
 echo 'imx_rpmsg_tty' >> /etc/modules
 rm /etc/bluetooth/variscite-bt
 fw_setenv fdt_file imx8mn-var-som-fulfil-lfp.dtb 
-mv /opt/fulfil/lfp-core /home/usrFtp/code/
+cp /opt/fulfil/lfp-core /home/usrFtp/code/
 
 # Remove firstboot bootstrap script
 echo "Removing firstboot script..."
