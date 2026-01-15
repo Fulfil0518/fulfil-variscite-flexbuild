@@ -198,6 +198,7 @@ echo 'imx_rpmsg_tty' >> /etc/modules
 rm /etc/bluetooth/variscite-bt
 fw_setenv fdt_file imx8mn-var-som-fulfil-lfp.dtb 
 cp /opt/fulfil/lfp-core /home/usrFtp/code/
+chmod +x /home/usrFtp/code/lfp-core
 
 # install ssh keys
 mkdir -p /root/.ssh/
