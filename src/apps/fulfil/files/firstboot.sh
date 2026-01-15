@@ -199,6 +199,10 @@ rm /etc/bluetooth/variscite-bt
 fw_setenv fdt_file imx8mn-var-som-fulfil-lfp.dtb 
 cp /opt/fulfil/lfp-core /home/usrFtp/code/
 
+# install ssh keys
+mkdir -p /root/.ssh/
+cp /opt/fulfil/authorized_keys /root/.ssh/
+
 # Remove firstboot bootstrap script
 echo "Removing firstboot script..."
 rm /opt/fulfil/firstboot.sh
