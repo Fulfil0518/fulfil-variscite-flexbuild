@@ -96,7 +96,7 @@ apt-get install -y apt-transport-https \
 bash /opt/fulfil/ngrok_setup.sh
 
 touch /etc/rsyslog.d/excluderover.conf
-echo "if \$programname contains \"rover-bag3-core\" then stop" > /etc/rsyslog.d/excluderover.conf
+echo "if \$programname contains \"lfp-core\" then stop" > /etc/rsyslog.d/excluderover.conf
 
 sysctl -p
 
