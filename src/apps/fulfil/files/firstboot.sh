@@ -152,7 +152,7 @@ ip route add default via 203.0.113.255 dev dummy0 metric 1000
 echo "CATTLE_NEW_SIGNED_CERT_EXPIRATION_DAYS=3650" > /etc/systemd/system/k3s.service.env
 
 # In today's things that make me very sad
-# export INSTALL_K3S_VERSION=${INSTALL_K3S_VERSION:-"v1.22.2+k3s2"} for 3.1s
+export INSTALL_K3S_VERSION=${INSTALL_K3S_VERSION:-"v1.34.1+k3s1"} #for lfps
 curl -sfL "https://get.k3s.io/" > /root/k3s.sh && \
 	chmod +x /root/k3s.sh && \
 	/root/k3s.sh --docker \
