@@ -32,6 +32,5 @@ extra_desktop_devel_packages_backport=" \
 	ccze \
 	usbutils \
 	rsync \
-	rsyslog \
-    ngrok
+	rsyslog
 "
