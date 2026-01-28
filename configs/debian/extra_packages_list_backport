@@ -13,6 +13,7 @@ extra_server_devel_packages_backport=" \
     python3-venv \
 "
 
+# Note: keep time sync via systemd-timesyncd; installing ntp pulls ntpsec and conflicts.
 extra_desktop_devel_packages_backport=" \
     gpiod \
     libgpiod-dev \
@@ -28,7 +29,6 @@ extra_desktop_devel_packages_backport=" \
     nano \
 	htop \
 	net-tools \
-	ntp \
 	ccze \
 	usbutils \
 	rsync \
