@@ -14,7 +14,9 @@ CM_BUILD_TARGETS ?= debug ddr_debug
 freertos_variscite:
 	@[ $(SOCFAMILY) != IMX -o $(DISTROVARIANT) = base -o $(DISTROVARIANT) = tiny -o $(FREERTOS_SUPPORT) = false ] && exit || \
 	$(call fbprint_b,"freertos_variscite") && \
-	git clone $(repo_freertos_variscite_url) --no-checkout $(PKGDIR)/apps/utils/freertos_variscite && \
+	if [ ! -d $(PKGDIR)/apps/utils/freertos_variscite ]; then \
+		git clone $(repo_freertos_variscite_url) --no-checkout $(PKGDIR)/apps/utils/freertos_variscite; \
+	fi && \
 	cd $(PKGDIR)/apps/utils/freertos_variscite && \
 	git checkout $(FREERTOS_COMMIT) && \
 	$(call repo-mngr,fetch,meta_variscite_bsp_imx) && \

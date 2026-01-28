@@ -23,5 +23,5 @@ imx_sc_firmware:
 	$(MAKE) $${MACHINE:4:2} R=B0 B=var_som V=1 && \
 	mkdir -p $(FBOUTDIR)/bsp/imx_sc_firmware/$(MACHINE) && \
 	cp -f $(PKGDIR)/bsp/imx_sc_firmware/src/scfw_export_mx8$${MACHINE:4:2}_b0/build_mx8$${MACHINE:4:2}_b0/scfw_tcm.bin \
-		$(FBOUTDIR)/bsp/imx_sc_firmware/$(MACHINE)/ && \
+		$(BSPDIR)/imx_mkimage/iMX8QM && \
 	$(call fbprint_d,"imx_sc_firmware")

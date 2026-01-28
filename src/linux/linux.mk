@@ -66,9 +66,6 @@ linux:
 		[ -f "$$src" ] || { $(call fbprint_e,DTB not found: $$src); exit 1; }; \
 		cp "$$src" "$$dst" || { $(call fbprint_e,Copy failed: $$src -> $$dst); exit 1; }; \
 	done; \
-	if [ $$MACHINE = imx8qxp-var-som ];  then \
-	    ln -s $(FBOUTDIR)/linux/$(KERNEL_TREE)/$(DESTARCH)/$(SOCFAMILY)/imx8qxp-var-som-symphony-sd.dtb $(FBOUTDIR)/linux/$(KERNEL_TREE)/$(DESTARCH)/$(SOCFAMILY)/imx8qxp-var-som-symphony.dtb; \
-	fi && \
 	ls -l $(FBOUTDIR)/linux/$(KERNEL_TREE)/$(DESTARCH)/$(SOCFAMILY) && \
 	$(call fbprint_d,"$(KERNEL_TREE) $$curbrch in $(FBOUTDIR)/linux/$(KERNEL_TREE)/$(DESTARCH)/$(SOCFAMILY)")
 

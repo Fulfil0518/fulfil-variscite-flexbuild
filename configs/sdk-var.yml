@@ -58,6 +58,7 @@ DEFAULT_PKGDIR: $FBDIR/components_${DISTRIB_VERSION}
 # default kernel config list
 KERNEL_CONFIG:
   ARM64_IMX: "imx8_var_defconfig"
+  ARM64_IMX8MQ: "imx8mq_var_dart_defconfig"
   ARM32_IMX: "imx_v7_defconfig"
 
 
@@ -81,11 +82,11 @@ repo:
 # BSP component repositories
   atf:
     url:  https://github.com/varigit/imx-atf.git
-    commit: 3b57a2b9cc3bb103f7ed5d044b1d1a8fcf3a42f6
+    commit: bed39c167c883b335d5fc1046ce16e10a611b4c4
 
   uboot:
     url:  https://github.com/varigit/uboot-imx.git
-    commit: 7f28fa65c6fa092c910d78a79edfd39c31d1fa6a
+    commit: df4294afa29d98060fe05290942a76e0d3dfb16c
 
   rcw:
     url:  https://github.com/nxp-qoriq/rcw.git
@@ -136,7 +137,7 @@ repo:
 
   imx_firmware:
     url:  https://github.com/NXP/imx-firmware.git
-    tag:  lf-6.6.52-2.2.0
+    tag:  lf-6.12.49-2.2.0
     # firmware for wifi/bt
 
   brcm_lwb_firmware:
@@ -166,7 +167,7 @@ repo:
 # kernel and modules git repositories
   linux:
     url:  https://github.com/varigit/linux-imx.git
-    commit:  dcd40b29dfc74b00a9542d9be0f98cd040f7d214
+    commit: fe3a35cdc16e7dfd63ff19d5b8dbc5cd32485494
 
   cryptodev_linux:
     url:  https://github.com/cryptodev-linux/cryptodev-linux.git
@@ -422,7 +423,7 @@ repo:
 
   meta_variscite_bsp_imx:
     url: https://github.com/varigit/meta-variscite-bsp-imx.git
-    commit: bd739cd6e5d3459fc5d5565e3fbe5834aa5416bb
+    commit: 25728e480cc65c4d5f010b980777a4ba4923396e
 
 # bsp components repositories
   freertos_variscite:

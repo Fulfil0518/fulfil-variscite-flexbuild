@@ -13,12 +13,8 @@ name: Build all machines - Public
 on:
   push:
     branches:
-      - LSDK-24.12_DEBIAN-12_LF-6.6.36_var01
+      - '**'
   workflow_dispatch:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   build-flexbuild:
@@ -36,6 +32,8 @@ jobs:
           - imx93-var-som
           - imx8qxp-var-som
           - imx91-var-som
+          - imx8mq-var-dart
+          - imx8qm-var-som
         rootfs:
           - server
           - desktop
@@ -61,10 +59,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Capture short commit SHA
+        id: short-sha
+        run: echo "value=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
       - name: Register QEMU for arm64
         uses: docker/setup-qemu-action@v3
         with:
           platforms: arm64
+          cache-image: false
 
       # Quick sanity-check on available storage
       - name: Report disk free space
@@ -84,39 +87,12 @@ jobs:
       # Prepare Docker build environment
       ############################################################
 
-      # Ensure the cache directory exists so tar always has something to archive
-      - name: Ensure Docker cache directory exists
-        run: mkdir -p .docker-image-cache
-
-      # Attempt to restore a previously cached fbdebian base image.
-      # The key is the SHA-256 of the Dockerfile; an exact match is required.
-      - name: Restore Docker image cache
-        id: docker-cache
-        uses: actions/cache@v3
-        with:
-          path: .docker-image-cache
-          key: docker-image-${{ runner.os }}-${{ hashFiles('./docker/debian/Dockerfile') }}
-
-      # Load the cached image when available
-      - name: Load cached image (if a hit)
-        if: steps.docker-cache.outputs.cache-hit == 'true'
-        run: |
-          echo "Loading cached base image"
-          docker load -i .docker-image-cache/image.tar
-
-      # Build the container only when the cache is missing
+      # Build the container from scratch
       - name: Build NXP Docker container
-        if: steps.docker-cache.outputs.cache-hit != 'true'
         run: |
           . setup.env || true
           echo "FBDIR is '$FBDIR'"
           bld docker || true
-
-      # Save the freshly-built image back into the cache
-      - name: Save Docker image to cache
-        if: steps.docker-cache.outputs.cache-hit != 'true'
-        run: |
-          docker save fbdebian:12 -o .docker-image-cache/image.tar
 
       # Export container name for subsequent steps
       - name: Save container name to variable
@@ -217,3 +193,14 @@ jobs:
             . setup.env || true
             bld -r debian:${{ matrix.rootfs }} -m ${{ matrix.machine }} -f sdk-var.yml create-recovery-sdcard-image
           '
+
+      - name: Upload packaged recovery image
+        uses: actions/upload-artifact@v4
+        with:
+          name: debian-bookworm-6.6.52_24.12-${{ matrix.machine }}-${{ matrix.rootfs }}-${{ steps.short-sha.outputs.value }}
+          path: |
+            build_lsdk2412/images/var-recovery-image-${{ matrix.machine }}.img.zst
+            build_lsdk2412/images/var-recovery-image-${{ matrix.machine }}.img.bmap
+            build_lsdk2412/images/rootfs_lsdk2412_debian_${{ matrix.rootfs }}_arm64.tar.zst
+          if-no-files-found: error
+          retention-days: 90

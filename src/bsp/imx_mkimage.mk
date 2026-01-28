@@ -38,7 +38,7 @@ define imx_mkimage_target
 	./fw_upower.bin --auto-accept && mv `basename -s .bin $(repo_fw_upower_bin_url)` fw_upower && rm -f fw_upower.bin; \
     fi && \
     if [ ! -f $(BSPDIR)/imx-scfw/mx8qx-mek-scfw-tcm.bin ]; then \
-	wget -q $(repo_scfw_bin_url) -O imx-scfw.bin && chmod +x imx-scfw.bin && \
+	cd $(BSPDIR) && wget -q $(repo_scfw_bin_url) -O imx-scfw.bin && chmod +x imx-scfw.bin && \
 	./imx-scfw.bin --auto-accept && mv `basename -s .bin $(repo_scfw_bin_url)` imx-scfw && rm -f imx-scfw.bin; \
     fi && \
     if [ ! -d $(BSPDIR)/imx_sc_firmware/ ]; then \
@@ -59,9 +59,9 @@ define imx_mkimage_target
 	SOC=iMX8MN; SOC_FAMILY=iMX8M; target=$${IMX_MKIMAGE_TARGET:-flash_evk}; \
     elif echo $1 | grep -qE ^imx8mq; then \
 	SOC=iMX8M; SOC_FAMILY=iMX8M; target=$${IMX_MKIMAGE_TARGET:-flash_evk}; \
+	cp -f $(BSPDIR)/firmware-imx/firmware/hdmi/cadence/signed_* $(BSPDIR)/imx_mkimage/$$SOC_FAMILY; \
     elif echo $1 | grep -qE ^imx8qm; then \
 	SOC=iMX8QM; SOC_FAMILY=iMX8QM; target=$${IMX_MKIMAGE_TARGET:-flash_spl}; \
-	cp -f $(BSPDIR)/imx-scfw/mx8qm-mek-scfw-tcm.bin $(BSPDIR)/imx_mkimage/iMX8QM/scfw_tcm.bin; \
 	cp -f $(BSPDIR)/imx-seco/firmware/seco/mx8qmb0-ahab-container.img $(BSPDIR)/imx_mkimage/iMX8QM; \
     elif echo $1 | grep -qE ^imx8qx; then \
 	SOC=iMX8QX; SOC_FAMILY=iMX8QX; target=$${IMX_MKIMAGE_TARGET:-flash_spl}; \
@@ -110,7 +110,7 @@ define imx_mkimage_target
 	$$opdir/spl/u-boot-spl.bin $$opdir/u-boot.bin \
 	$$opdir/arch/arm/dts/*$${plat}*.dtb \
 	$$opdir/u-boot-nodtb.bin && \
-    if [ $(CONFIG_OPTEE) = y -a -f $$bl32 ]; then \
+    if [ "$(CONFIG_OPTEE)" = y -a -f $$bl32 ]; then \
 	cp -f $$bl32 $(BSPDIR)/imx_mkimage/$$SOC_FAMILY/tee.bin; \
     fi && \
     cp -f $$opdir/tools/mkimage $(BSPDIR)/imx_mkimage/$$SOC_FAMILY/mkimage_uboot && \

@@ -19,6 +19,8 @@ jobs:
           - imx95-var-dart
           - imx93-var-som
           - imx8qxp-var-som
+          - imx8mq-var-dart
+          - imx8qm-var-som
         rootfs:
           - desktop
     uses: varigit-dev/action-workflows/.github/workflows/flexbuild.yml@dev_flexbuild

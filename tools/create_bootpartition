@@ -49,7 +49,6 @@ generate_bootpartition() {
 	[ ! -d $FBOUTDIR/bsp/imx_firmware/lib/firmware/imx/sof-gcc ] &&  bld sof_zephyr -a $DESTARCH -p $SOCFAMILY
 	[ ! -d $FBOUTDIR/bsp/imx_firmware/lib/firmware/imx/dsp ] && bld imx_dsp -a $DESTARCH -p $SOCFAMILY
 	[ ! -d $FBOUTDIR/bsp/imx_firmware/lib/firmware/imx/easrc ] && bld imx_firmware -a $DESTARCH -p $SOCFAMILY
-	[ ! -d $FBOUTDIR/bsp/var_imx_firmware/lib/firmware ] && bld var_imx_firmware -a $DESTARCH -p $SOCFAMILY
 	[ ! -d $FBOUTDIR/bsp/imx_mcore_demos/imx93-m33-demo ] && bld mcore_demo -a $DESTARCH -p $SOCFAMILY
 	[ ! -d $DESTDIR/usr/lib/ethosu_firmware ] && [ $PKG_GROUPS_ML = "y" ] && bld ethosu_firmware -a $DESTARCH -p $SOCFAMILY
 	[ ! -d $FBOUTDIR/bsp/brcm_firmware/lib/firmware ] && bld brcm_firmware -a $DESTARCH -p $SOCFAMILY
