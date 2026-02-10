@@ -1,13 +1,12 @@
-From 48de14d0217a927df60fda370339c3bfece38e5a Mon Sep 17 00:00:00 2001
+From 80b622c21de3f680a5c4128231a2d3c1513b4524 Mon Sep 17 00:00:00 2001
 From: Kevin Jesubalan <kevin.jesubalan@fulfil.com>
-Date: Mon, 26 Jan 2026 19:38:33 -0800
-Subject: [PATCH] change gpio pin and kernel config
+Date: Fri, 6 Feb 2026 16:36:40 -0800
+Subject: [PATCH] fix gpio
 
 ---
  arch/arm64/boot/dts/freescale/imx8mn-var-som-fulfil-lfp.dts | 5 ++---
  arch/arm64/boot/dts/freescale/imx8mn-var-som.dtsi           | 2 +-
- arch/arm64/configs/imx8_var_defconfig                       | 5 +++++
- 3 files changed, 8 insertions(+), 4 deletions(-)
+ 2 files changed, 3 insertions(+), 4 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/freescale/imx8mn-var-som-fulfil-lfp.dts b/arch/arm64/boot/dts/freescale/imx8mn-var-som-fulfil-lfp.dts
 index 8a394b631882..66f3af8a238f 100644
@@ -52,29 +51,6 @@ index cfaef77a6510..9d199d7f47ca 100644
  	};
  };
  
-diff --git a/arch/arm64/configs/imx8_var_defconfig b/arch/arm64/configs/imx8_var_defconfig
-index fde9295b32f2..b8d0b1015460 100644
---- a/arch/arm64/configs/imx8_var_defconfig
-+++ b/arch/arm64/configs/imx8_var_defconfig
-@@ -120,6 +120,10 @@ CONFIG_NETFILTER_XT_MATCH_BPF=m
- CONFIG_NETFILTER_XT_MATCH_COMMENT=y
- CONFIG_NETFILTER_XT_MATCH_CONNTRACK=m
- CONFIG_NETFILTER_XT_MATCH_IPVS=m
-+CONFIG_IP_SET=y
-+CONFIG_IP_SET_HASH_IP=y
-+CONFIG_IP_SET_HASH_IPPORT=y
-+CONFIG_IP_SET_HASH_NET=y
- CONFIG_IP_VS=m
- CONFIG_IP_VS_PROTO_TCP=y
- CONFIG_IP_VS_PROTO_UDP=y
-@@ -143,6 +147,7 @@ CONFIG_IP6_NF_MANGLE=m
- CONFIG_IP6_NF_NAT=m
- CONFIG_IP6_NF_TARGET_MASQUERADE=m
- CONFIG_NF_TABLES_BRIDGE=m
-+CONFIG_NF_CONNTRACK_BRIDGE=m
- CONFIG_BRIDGE_NF_EBTABLES=m
- CONFIG_BRIDGE=y
- CONFIG_BRIDGE_VLAN_FILTERING=y
 -- 
 2.34.1
 

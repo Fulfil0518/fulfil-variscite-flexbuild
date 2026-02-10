@@ -8,5 +8,6 @@ After=network-online.target
 [Service]
 EnvironmentFile=/etc/environment
 Type=oneshot
+ExecStartPre=/bin/sleep 100
 ExecStart=/opt/fulfil/camera_install.sh
 TimeoutSec=300

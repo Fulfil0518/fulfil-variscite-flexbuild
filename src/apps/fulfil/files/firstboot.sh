@@ -104,6 +104,17 @@ systemctl stop ntp
 ntpd -gq
 systemctl start ntp
 
+#set up networkd to not manage k3s cni interfaces
+mkdir -p /etc/systemd/network/
+cat > /etc/systemd/network/05-k8s-unmanaged.network <<EOF
+[Match]
+Name=cni* cbr* docker* flannel* veth*
+
+[Link]
+Unmanaged=yes
+EOF
+
+
 mkdir -p /etc/docker 
 cat > /etc/docker/daemon.json <<EOF
 {
@@ -152,7 +163,7 @@ ip route add default via 203.0.113.255 dev dummy0 metric 1000
 echo "CATTLE_NEW_SIGNED_CERT_EXPIRATION_DAYS=3650" > /etc/systemd/system/k3s.service.env
 
 # In today's things that make me very sad
-export INSTALL_K3S_VERSION=${INSTALL_K3S_VERSION:-"v1.34.1+k3s1"} #for lfps
+export INSTALL_K3S_VERSION=${INSTALL_K3S_VERSION:-"v1.32.0+k3s1"} #for lfps
 curl -sfL "https://get.k3s.io/" > /root/k3s.sh && \
 	chmod +x /root/k3s.sh && \
 	/root/k3s.sh --docker \
@@ -207,7 +218,7 @@ cp /opt/fulfil/authorized_keys /root/.ssh/
 # Remove firstboot bootstrap script
 echo "Removing firstboot script..."
 rm /opt/fulfil/firstboot.sh
-rm /etc/systemd/system/default.target.wants/firstboot.service
+rm /etc/systemd/system/multi-user.target.wants/firstboot.service
 systemctl disable k3s.service # disable k3s to be re-enabled later by us once at TAN
 
 # Shutdown

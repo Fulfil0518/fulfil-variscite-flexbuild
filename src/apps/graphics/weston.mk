@@ -30,6 +30,10 @@ ifeq ($(strip $(subst ",,$(CONFIG_WESTON))),y)
 	 if [ ! -d $(DESTDIR)/usr/share/wayland-protocols ]; then \
 	     bld wayland_protocols -r $(DISTROTYPE):$(DISTROVARIANT); \
 	 fi && \
+	 if [ -d $(DESTDIR)/usr/share/wayland-protocols ]; then \
+	     sudo mkdir -p $(RFSDIR)/usr/share && \
+	     sudo cp -rf $(DESTDIR)/usr/share/wayland-protocols $(RFSDIR)/usr/share/; \
+	 fi && \
 	 if [ ! -d $(DESTDIR)/usr/include/EGL ]; then \
 	     bld gpu_viv -r $(DISTROTYPE):$(DISTROVARIANT); \
 	 fi && \

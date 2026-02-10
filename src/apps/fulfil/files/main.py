@@ -103,10 +103,10 @@ def ISRCallback(data):
 
             LED(2).on()
             tags[buff_idx].tag_dst = struct.pack("<HHHH",
-                    tags_found[0].cx(),
-                    tags_found[0].cy(),
-                    tags_found[0].id(),
-                    int(math.degrees(tags_found[0].rotation())))
+                    tags_found[0].cx,
+                    tags_found[0].cy,
+                    tags_found[0].id,
+                    int(math.degrees(tags_found[0].rotation)))
             tags[buff_idx].mutex.release()
             if not VCP:
                 print("Tag found:[cx=%d, cy=%d, id=%d, rot=%d]" \

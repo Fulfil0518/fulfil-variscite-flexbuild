@@ -15,7 +15,7 @@ mount $DEV /media/usb/
 if [ $? -eq 0 ]; then
     echo "$DEV Mounted"
     cp main.py /media/usb/
-    umount /media/usb/
+    umount $DEV
     echo "files sent"
     rm -f /etc/systemd/system/multi-user.target.wants/fulfil-camera-install.service \
         /etc/systemd/system/fulfil-camera-install.service

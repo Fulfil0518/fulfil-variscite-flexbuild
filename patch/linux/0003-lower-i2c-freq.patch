@@ -1,0 +1,25 @@
+From 8b3a3549f977b2c7c017522c05cdc645ce6c4ec8 Mon Sep 17 00:00:00 2001
+From: Kevin Jesubalan <kevin.jesubalan@fulfil.com>
+Date: Mon, 9 Feb 2026 16:02:05 -0800
+Subject: [PATCH 3/3] lower i2c freq
+
+---
+ arch/arm64/boot/dts/freescale/imx8mn-var-som-fulfil-lfp.dts | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mn-var-som-fulfil-lfp.dts b/arch/arm64/boot/dts/freescale/imx8mn-var-som-fulfil-lfp.dts
+index 66f3af8a238f..ec727bee35d2 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mn-var-som-fulfil-lfp.dts
++++ b/arch/arm64/boot/dts/freescale/imx8mn-var-som-fulfil-lfp.dts
+@@ -243,7 +243,7 @@ &i2c1 {
+ };
+ 
+ &i2c2 {
+-	clock-frequency = <400000>;
++	clock-frequency = <100000>;
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_i2c2>;
+ 	scl-gpios = <&gpio5 16 GPIO_ACTIVE_HIGH>;
+-- 
+2.34.1
+
