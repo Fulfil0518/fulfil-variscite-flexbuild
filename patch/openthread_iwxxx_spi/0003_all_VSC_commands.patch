@@ -1,6 +1,6 @@
 /*
 *  Copyright (c) 2020, The OpenThread Authors.
-*  Copyright 2023-2024 NXP
+*  Copyright 2023-2025 NXP
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -38,16 +38,17 @@
 *                       : Add Vendor specific commands for Reading the FW version.
 *                       : Add Vendor specific commands for upgrading the independant reset feature for OOB
 *                         GPIO soft reset.
-* Version               : v001
+* Version               : v005
+*                       : v004 -Modified TX power limit VSC to support enable/disable TX Power clamping on CH 26
+*                       : v005 -Return Invalid argument error if TX power limit > 127.
 * Mandatory/Optional    : Optional
 * Impact if not applied : VSC commands won't be available.
 */
 
-
-Upstream-Status: Inappropriate  [platform specific changes]
+Upstream-Status: Inappropriate [platform specific changes]
 
 diff --git a/include/openthread/platform/radio.h b/include/openthread/platform/radio.h
-index 9f6bd31a6..27fd80b34 100644
+index c793bd748..1bbbf44a1 100644
 --- a/include/openthread/platform/radio.h
 +++ b/include/openthread/platform/radio.h
 @@ -2,6 +2,8 @@
@@ -59,10 +60,10 @@ index 9f6bd31a6..27fd80b34 100644
   *  Redistribution and use in source and binary forms, with or without
   *  modification, are permitted provided that the following conditions are met:
   *  1. Redistributions of source code must retain the above copyright
-@@ -435,6 +437,25 @@ typedef struct otLinkMetrics
+@@ -446,6 +448,25 @@ typedef struct otLinkMetrics
      bool mReserved : 1;   ///< Reserved, this is for reference device.
  } otLinkMetrics;
- 
+
 +/**
 + * This structure represents different CCA mode configurations before Tx.
 + */
@@ -84,36 +85,41 @@ index 9f6bd31a6..27fd80b34 100644
 +
  /**
   * @}
-  *
-@@ -1384,11 +1405,60 @@ extern otError otPlatRadioGetRawPowerSetting(otInstance *aInstance,
-  * @}
-  *
   */
-+void otPlatRadioSetIRCmd(otInstance *aInstance);
+@@ -1374,6 +1395,65 @@ extern otError otPlatRadioGetRawPowerSetting(otInstance *aInstance,
+                                              uint8_t     aChannel,
+                                              uint8_t    *aRawPowerSetting,
+                                              uint16_t   *aRawPowerSettingLength);
++/**
++ * @}
++ *
++ */
++otError otPlatRadioSetIRCmd(otInstance *aInstance);
 +
 +/**
 + * @}
 + *
 + */
-+void otPlatRadioSetIRConfig(otInstance *aInstance, uint8_t mode);
++otError otPlatRadioSetIRConfig(otInstance *aInstance, uint8_t mode);
 +
 +/**
 + * @}
 + *
 + */
-+void otPlatRadioGetIRConfig(otInstance *aInstance, uint8_t* mode);
++otError otPlatRadioGetIRConfig(otInstance *aInstance, uint8_t* mode);
 +
 +/**
 + * @}
 + *
 + */
 +otError otPlatRadioSetIeeeEui64(otInstance *aInstance, const otExtAddress *aIeeeEui64);
- 
- /**
-  * @}
-  *
-  */
++
++/**
++ * @}
++ *
++ */
 +otError otPlatRadioSetTxPowerLimit(otInstance *aInstance, uint8_t txPowerLimit);
++
 +/**
 + * @}
 + *
@@ -143,16 +149,14 @@ index 9f6bd31a6..27fd80b34 100644
 + *
 +*/
 +otError otPlatRadioIRThresholdConfig(otInstance *aInstance, otIRConfig *aIRConfig, uint8_t aSetValue);
- 
- #ifdef __cplusplus
- } // end of extern "C"
-Upstream-Status: Inappropriate  [platform specific changes]
 
+ /**
+  * @}
 diff --git a/src/lib/spinel/radio_spinel.cpp b/src/lib/spinel/radio_spinel.cpp
-index cbb3331bf..15650f64b 100644
+index f5fb7b5d0..a38e5d757 100644
 --- a/src/lib/spinel/radio_spinel.cpp
 +++ b/src/lib/spinel/radio_spinel.cpp
-@@ -919,6 +919,111 @@ otError RadioSpinel::GetIeeeEui64(uint8_t *aIeeeEui64)
+@@ -939,6 +939,111 @@ otError RadioSpinel::GetIeeeEui64(uint8_t *aIeeeEui64)
      return OT_ERROR_NONE;
  }
  
@@ -264,13 +268,11 @@ index cbb3331bf..15650f64b 100644
  otError RadioSpinel::SetExtendedAddress(const otExtAddress &aExtAddress)
  {
      otError error;
-Upstream-Status: Inappropriate  [platform specific changes]
-
 diff --git a/src/lib/spinel/radio_spinel.hpp b/src/lib/spinel/radio_spinel.hpp
-index d053a9296..c11fe9d0e 100644
+index 1e1590880..bf86db2f4 100644
 --- a/src/lib/spinel/radio_spinel.hpp
 +++ b/src/lib/spinel/radio_spinel.hpp
-@@ -244,6 +244,99 @@ public:
+@@ -254,6 +254,99 @@ public:
       */
      otError GetIeeeEui64(uint8_t *aIeeeEui64);
  
@@ -370,13 +372,11 @@ index d053a9296..c11fe9d0e 100644
      /**
       * Sets the Extended Address for address filtering.
       *
-Upstream-Status: Inappropriate  [platform specific changes]
-
 diff --git a/src/lib/spinel/spinel.h b/src/lib/spinel/spinel.h
-index c1865f373..f4b95b76f 100644
+index e1cb888ba..d41f76bfa 100644
 --- a/src/lib/spinel/spinel.h
 +++ b/src/lib/spinel/spinel.h
-@@ -4910,6 +4910,16 @@ enum
+@@ -4970,6 +4970,16 @@ enum
      SPINEL_PROP_NEST__END = 0x3C00,
  
      SPINEL_PROP_VENDOR__BEGIN = 0x3C00,
@@ -393,15 +393,13 @@ index c1865f373..f4b95b76f 100644
      SPINEL_PROP_VENDOR__END   = 0x4000,
  
      SPINEL_PROP_VENDOR_ESP__BEGIN = (SPINEL_PROP_VENDOR__BEGIN + 0),
-Upstream-Status: Inappropriate  [platform specific changes]
-
 diff --git a/src/posix/main.c b/src/posix/main.c
-index 026c6c6eb..781b0c5e0 100644
+index 40bcea70a..43cfa2851 100644
 --- a/src/posix/main.c
 +++ b/src/posix/main.c
-@@ -69,6 +69,14 @@
- 
- #include "lib/platform/reset_util.h"
+@@ -69,6 +69,15 @@
+ #include <openthread/openthread-system.h>
+ #include <openthread/platform/misc.h>
  
 +extern otError ProcessIRConfig(void *aContext, uint8_t aArgsLength, char *aArgs[]);
 +extern otError ProcessIRCmd(void *aContext, uint8_t aArgsLength, char *aArgs[]);
@@ -411,10 +409,11 @@ index 026c6c6eb..781b0c5e0 100644
 +extern otError ProcessGetSetCcaCfg(void *aContext, uint8_t aArgsLength, char *aArgs[]);
 +extern otError ProcessGetFwVersion(void *aContext, uint8_t aArgsLength, char *aArgs[]);
 +extern otError ProcessGetSetIRThreshold(void *aContext, uint8_t aArgsLength, char *aArgs[]);
++
  /**
   * Initializes NCP app.
   *
-@@ -356,6 +364,14 @@ static const otCliCommand kCommands[] = {
+@@ -364,6 +373,14 @@ static const otCliCommand kCommands[] = {
      {"exit", ProcessExit},
  #endif
      {"netif", ProcessNetif},
@@ -429,13 +428,11 @@ index 026c6c6eb..781b0c5e0 100644
  };
  
  int main(int argc, char *argv[])
-Upstream-Status: Inappropriate  [platform specific changes]
-
 diff --git a/src/posix/platform/daemon.cpp b/src/posix/platform/daemon.cpp
-index dad11a743..5a15a8f90 100644
+index dad11a743..8859317d7 100644
 --- a/src/posix/platform/daemon.cpp
 +++ b/src/posix/platform/daemon.cpp
-@@ -75,6 +75,624 @@ void GetFilename(Filename &aFilename, const char *aPattern)
+@@ -75,6 +75,641 @@ void GetFilename(Filename &aFilename, const char *aPattern)
  
  } // namespace
  
@@ -502,11 +499,8 @@ index dad11a743..5a15a8f90 100644
 +{
 +    OT_UNUSED_VARIABLE(aArgsLength);
 +    OT_UNUSED_VARIABLE(aArgs);
-+    //syslog(LOG_INFO, "ProcessIRCmd");
-+    otPlatRadioSetIRCmd((otInstance*)aContext);
-+    //syslog(LOG_INFO, "ProcessIRCmd DONE");
 +
-+    return OT_ERROR_NONE;
++    return otPlatRadioSetIRCmd((otInstance*)aContext);
 +}
 +
 +otError ProcessSetEui64(void *aContext, uint8_t aArgsLength, char *aArgs[])
@@ -582,20 +576,39 @@ index dad11a743..5a15a8f90 100644
 +
 +    otError error = OT_ERROR_INVALID_ARGS;
 +    uint8_t txPowerLimit = 0;
-+
++    uint8_t ch26Clamp = 1;
 +    //syslog(LOG_INFO, "SetTxPowerLimit");
 +
-+    if( aArgsLength == 1 ) // set tx power limit
++    if( aArgsLength != 0 ) // set tx power limit
 +    {
 +        txPowerLimit = (uint8_t)atoi(aArgs[0]);
-+        if((txPowerLimit>=1)&&(txPowerLimit<=44)){
-+            //syslog(LOG_INFO, "-> txPowerLimit : %d", txPowerLimit);
-+        }else{
-+            //syslog(LOG_INFO, "-> txPowerLimit : default value");
++
++        if(txPowerLimit < 128)
++        {
++
++            if( aArgsLength == 2 )
++            {
++                if(strcmp(aArgs[1],"disableRFCH26Clamp") == 0)
++                {
++                    ch26Clamp = 0;
++                }
++                else if(strcmp(aArgs[1],"enableRFCH26Clamp") == 0)
++                {
++                    ch26Clamp = 1;
++                }
++
++            }
++
++            txPowerLimit = (txPowerLimit & 0x7F) | (ch26Clamp << 7);
++            otPlatRadioSetTxPowerLimit((otInstance*)aContext, txPowerLimit);
++            //syslog(LOG_INFO, "SetTxPowerLimit DONE");
++            error = OT_ERROR_NONE;
 +        }
-+        otPlatRadioSetTxPowerLimit((otInstance*)aContext, txPowerLimit);
-+        //syslog(LOG_INFO, "SetTxPowerLimit DONE");
-+        error = OT_ERROR_NONE;
++        else
++        {
++            error = OT_ERROR_INVALID_ARGS;
++        }
++
 +    }
 +    else if ( aArgsLength == 0 ) // get tx power limit
 +    {
@@ -605,7 +618,8 @@ index dad11a743..5a15a8f90 100644
 +        //syslog(LOG_INFO, "TX power Value value : %d", txPowerLimit);
 +
 +        // Print value as ot-cli output
-+        otCliOutputFormat("%d\r\n", txPowerLimit);
++        otCliOutputFormat("Tx Power Limit: %d\r\n", txPowerLimit & 0x7F);
++        otCliOutputFormat("Tx Power Clamping at 0dBm for CH 26: %s\r\n", ((txPowerLimit >> 7) & 0x01)? "enabled":"disabled");
 +        error = OT_ERROR_NONE;
 +    }
 +    else
@@ -1060,7 +1074,7 @@ index dad11a743..5a15a8f90 100644
  const char Daemon::kLogModuleName[] = "Daemon";
  
  int Daemon::OutputFormat(const char *aFormat, ...)
-@@ -292,6 +910,8 @@ exit:
+@@ -292,6 +927,8 @@ exit:
      otSysCliInitUsingDaemon(gInstance);
  #endif
  
@@ -1069,32 +1083,32 @@ index dad11a743..5a15a8f90 100644
      Mainloop::Manager::Get().Add(*this);
  
      return;
-Upstream-Status: Inappropriate  [platform specific changes]
-
 diff --git a/src/posix/platform/radio.cpp b/src/posix/platform/radio.cpp
-index f5eb17cc2..5ef6cd53e 100644
+index 6bc33c2f0..962ff03f5 100644
 --- a/src/posix/platform/radio.cpp
 +++ b/src/posix/platform/radio.cpp
-@@ -1044,6 +1044,73 @@ otError otPlatRadioReceiveAt(otInstance *aInstance, uint8_t aChannel, uint32_t a
+@@ -1048,6 +1048,75 @@ otError otPlatRadioReceiveAt(otInstance *aInstance, uint8_t aChannel, uint32_t a
      return OT_ERROR_NOT_IMPLEMENTED;
  }
  
-+void otPlatRadioSetIRConfig(otInstance *aInstance, uint8_t mode)
++otError otPlatRadioSetIRConfig(otInstance *aInstance, uint8_t mode)
 +{
 +    OT_UNUSED_VARIABLE(aInstance);
-+    SuccessOrDie(GetRadioSpinel().SetIRConfig(mode));
++    return GetRadioSpinel().SetIRConfig(mode);
 +}
 +
-+void otPlatRadioGetIRConfig(otInstance *aInstance, uint8_t* mode)
++otError otPlatRadioGetIRConfig(otInstance *aInstance, uint8_t* mode)
 +{
 +    OT_UNUSED_VARIABLE(aInstance);
-+    SuccessOrDie(GetRadioSpinel().GetIRConfig(*mode));
++    return GetRadioSpinel().GetIRConfig(*mode);
 +}
 +
-+void otPlatRadioSetIRCmd(otInstance *aInstance)
++otError otPlatRadioSetIRCmd(otInstance *aInstance)
 +{
 +    OT_UNUSED_VARIABLE(aInstance);
-+    SuccessOrDie(GetRadioSpinel().Set(SPINEL_PROP_VENDOR_NXP_IR_CMD, SPINEL_DATATYPE_UINT16_S));
++    otError status = GetRadioSpinel().Set(SPINEL_PROP_VENDOR_NXP_IR_CMD, SPINEL_DATATYPE_UINT16_S);
++    if (status == OT_ERROR_NONE) DieNow(status);
++    return status;
 +}
 +
 +otError otPlatRadioSetIeeeEui64(otInstance *aInstance, const otExtAddress *aIeeeEui64)

@@ -129,6 +129,13 @@ mmdebstrap:
     - hostapd
     - screen
     - python3-dbus
+    - tpm2-tools
+    - libtpm2-pkcs11-1
+    - libtpm2-pkcs11-tools
+    - tpm2-abrmd
+    - tpm2-openssl
+    - python3-tpm2-pytss
+    - evtest
   setup-hooks:
       # Setup NXP board-specific configurations for various platforms
     - 'mkdir -p $1/usr/local/bin $1/etc/udev/rules.d $1/etc/modprobe.d'

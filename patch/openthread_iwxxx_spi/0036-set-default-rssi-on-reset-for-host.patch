@@ -1,6 +1,6 @@
 /*
 *  Copyright (c) 2020, The OpenThread Authors.
-*  Copyright 2023-2024 NXP
+*  Copyright 2023-2025 NXP
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -30,22 +30,23 @@
 /*
 * Header for patch information.
 * Description           : Set default RSSI on reset.
-* Version               : v002
+* Version               : v004
 * Mandatory/Optional    : Optional
 * Impact if not applied : Previously latched RSSI value will be used even after a reset.
 */
 
-Upstream-Status: Inappropriate  [platform specific changes]
+Upstream-Status: Inappropriate [platform specific changes]
 
 diff --git a/src/lib/spinel/radio_spinel.cpp b/src/lib/spinel/radio_spinel.cpp
-index 4ee2a2bfa..0347d53e4 100644
+index c4b405d92..9075c050a 100644
 --- a/src/lib/spinel/radio_spinel.cpp
 +++ b/src/lib/spinel/radio_spinel.cpp
-@@ -1791,6 +1791,7 @@ otError RadioSpinel::Enable(otInstance *aInstance)
+@@ -1890,6 +1890,7 @@ otError RadioSpinel::Enable(otInstance *aInstance)
      SuccessOrExit(error = Set(SPINEL_PROP_MAC_15_4_PANID, SPINEL_DATATYPE_UINT16_S, mPanId));
      SuccessOrExit(error = Set(SPINEL_PROP_MAC_15_4_SADDR, SPINEL_DATATYPE_UINT16_S, mShortAddress));
      SuccessOrExit(error = Get(SPINEL_PROP_PHY_RX_SENSITIVITY, SPINEL_DATATYPE_INT8_S, &mRxSensitivity));
 +    SuccessOrExit(error = Set(SPINEL_PROP_PHY_RSSI, SPINEL_DATATYPE_INT8_S));
- 
+
      mState = kStateSleep;
- 
+
+

@@ -1,6 +1,6 @@
 /*
 *  Copyright (c) 2020, The OpenThread Authors.
-*  Copyright 2024 NXP
+*  Copyright 2024-2025 NXP
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,7 @@
 /*
 * Header for patch information.
 * Description : Reset shall be available on RCP recovery mechanism (when multipan feature disabled)
-* Version : v001
+* Version : v003
 * Mandatory/Optional : Mandatory
 * Impact if not applied : ot-daemon might not recover
 */
@@ -38,17 +38,17 @@
 Upstream-Status: Inappropriate  [platform specific changes]
 
 diff --git a/src/lib/spinel/spinel_driver.cpp b/src/lib/spinel/spinel_driver.cpp
-index 037916013..88a454228 100644
+index b953d2969..d88d55df9 100644
 --- a/src/lib/spinel/spinel_driver.cpp
 +++ b/src/lib/spinel/spinel_driver.cpp
-@@ -114,8 +114,10 @@ void SpinelDriver::ResetCoprocessor(bool aSoftwareReset)
+@@ -124,8 +124,10 @@ void SpinelDriver::ResetCoprocessor(bool aSoftwareReset)
      bool hardwareReset;
      bool resetDone = false;
- 
+
 +#if OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE
      // Avoid resetting the device twice in a row in Multipan RCP architecture
      VerifyOrExit(!mIsCoprocessorReady, resetDone = true);
 +#endif
- 
+
      mWaitingKey = SPINEL_PROP_LAST_STATUS;
- 
+

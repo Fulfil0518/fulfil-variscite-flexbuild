@@ -11,11 +11,14 @@ imx_firmware:
 	 if [ -d $(FBDIR)/patch/imx_firmware ] && [ ! -f .patchdone ]; then \
 	     git am $(FBDIR)/patch/imx_firmware/*.patch && touch .patchdone; \
 	 fi && \
-	 mkdir -p $(FBOUTDIR)/bsp/imx_firmware/lib/firmware/{nxp,imx} && \
+	 mkdir -p $(FBOUTDIR)/bsp/imx_firmware/lib/firmware/{nxp,imx,brcm} && \
 	 echo Installing NXP WIFI/BT firmware && \
-	 cp -f $(BSPDIR)/imx_firmware/FwImage_*/* $(FBOUTDIR)/bsp/imx_firmware/lib/firmware/nxp 2>/dev/null || true && \
-	 cp -f $(BSPDIR)/imx_firmware/mfguart/*.bin $(FBOUTDIR)/bsp/imx_firmware/lib/firmware/nxp && \
-	 cp -f $(BSPDIR)/imx_firmware/wifi_mod_para.conf $(FBOUTDIR)/bsp/imx_firmware/lib/firmware/nxp && \
+	 cp -f $(BSPDIR)/imx_firmware/nxp/FwImage_*/* $(FBOUTDIR)/bsp/imx_firmware/lib/firmware/nxp 2>/dev/null || true && \
+	 cp -f $(BSPDIR)/imx_firmware/nxp/mfguart/*.bin $(FBOUTDIR)/bsp/imx_firmware/lib/firmware/nxp && \
+	 cp -f $(BSPDIR)/imx_firmware/nxp/wifi_mod_para.conf $(FBOUTDIR)/bsp/imx_firmware/lib/firmware/nxp && \
+	 echo Installing Murata WIFI/BT firmware && \
+	 cp -f $(BSPDIR)/imx_firmware/cyw-wifi-bt/*/{*.bin,*.clm_blob,*.txt} $(FBOUTDIR)/bsp/imx_firmware/lib/firmware/brcm/ && \
+	 cp -f $(BSPDIR)/imx_firmware/cyw-wifi-bt/*/*.hcd $(FBOUTDIR)/bsp/imx_firmware/lib/firmware/ && \
 	 \
 	 echo Installing firmware-imx for ddr,hdmi,dp,vpu,easrc,epdc,xcvr,xuvi && \
 	 if [ ! -d $(BSPDIR)/firmware-imx ]; then \

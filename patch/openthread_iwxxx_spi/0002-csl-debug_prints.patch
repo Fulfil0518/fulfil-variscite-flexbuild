@@ -1,6 +1,6 @@
 /*
 *  Copyright (c) 2020, The OpenThread Authors.
-*  Copyright 2023-2024 NXP
+*  Copyright 2023-2025 NXP
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -30,35 +30,33 @@
 /*
 * Header for patch information.
 * Description           : Added debug prints related to CSL timestamp for debug purpose.
-* Version               : v002
+* Version               : v004
 * Mandatory/Optional    : Optional
 * Impact if not applied : CSL timestamps won't be logged. Limited debug capabilities.
 */
 
-Upstream-Status: Inappropriate  [platform specific changes]
+Upstream-Status: Inappropriate [platform specific changes]
 
 diff --git a/src/core/thread/csl_tx_scheduler.cpp b/src/core/thread/csl_tx_scheduler.cpp
-index 35a070c1e..15a201b9d 100644
+index fdaed9791..51e3f2003 100644
 --- a/src/core/thread/csl_tx_scheduler.cpp
 +++ b/src/core/thread/csl_tx_scheduler.cpp
-@@ -170,6 +170,7 @@ uint32_t CslTxScheduler::GetNextCslTransmissionDelay(const Child &aChild,
- 
-     aDelayFromLastRx = static_cast<uint32_t>(nextTxWindow - aChild.GetLastRxTimestamp());
- 
-+    otLogInfoPlat("CSL radioNow = %lu, periodInUS = %hu,firstTXWindow = %lu, nextTxWindow = %lu, aDelayFromLastRx = %u, lastRxTimeStamp = %lu", radioNow, periodInUs, firstTxWindow, nextTxWindow, aDelayFromLastRx,aChild.GetLastRxTimestamp());
+@@ -149,6 +149,7 @@ uint32_t CslTxScheduler::GetNextCslTransmissionDelay(const CslNeighbor &aCslNeig
+
+     aDelayFromLastRx = static_cast<uint32_t>(nextTxWindow - aCslNeighbor.GetLastRxTimestamp());
+
++    otLogInfoPlat("CSL radioNow = %lu, periodInUS = %hu,firstTXWindow = %lu, nextTxWindow = %lu, aDelayFromLastRx = %u, lastRxTimeStamp = %lu", radioNow, periodInUs, firstTxWindow, nextTxWindow, aDelayFromLastRx, aCslNeighbor.GetLastRxTimestamp());
      return static_cast<uint32_t>(nextTxWindow - radioNow - aAheadUs);
  }
- 
-Upstream-Status: Inappropriate  [platform specific changes]
 
 diff --git a/src/lib/spinel/radio_spinel.cpp b/src/lib/spinel/radio_spinel.cpp
-index f17e3c70d..327344fc6 100644
+index f467c1f28..6e4ae4eef 100644
 --- a/src/lib/spinel/radio_spinel.cpp
 +++ b/src/lib/spinel/radio_spinel.cpp
-@@ -1864,7 +1864,12 @@ exit:
- #endif // OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
+@@ -1985,7 +1985,12 @@ exit:
+     LogIfFail("Error calculating RCP time offset: %s", error);
  }
- 
+
 -uint64_t RadioSpinel::GetNow(void) { return (mIsTimeSynced) ? (otPlatTimeGet() + mRadioTimeOffset) : UINT64_MAX; }
 +uint64_t RadioSpinel::GetNow(void)
 +{
@@ -66,6 +64,6 @@ index f17e3c70d..327344fc6 100644
 +
 +   return (mIsTimeSynced) ? (otPlatTimeGet() + mRadioTimeOffset) : UINT64_MAX;
 +}
- 
- uint32_t RadioSpinel::GetBusSpeed(void) const { return mSpinelInterface->GetBusSpeed(); }
- 
+
+ uint32_t RadioSpinel::GetBusSpeed(void) const { return GetSpinelDriver().GetSpinelInterface()->GetBusSpeed(); }
+

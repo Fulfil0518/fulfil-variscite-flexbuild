@@ -1,6 +1,6 @@
 /*
 *  Copyright (c) 2020, The OpenThread Authors.
-*  Copyright 2023-2024 NXP
+*  Copyright 2023-2025 NXP
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
 *                         increased from 44 to 200 to account for host system latency
 *                         under coex scenarios involving Wi-Fi and/or BT/BLE concurrently
 *                         with Thread.
-* Version               : v001
+* Version               : v002
 * Mandatory/Optional    : Mandatory
 * Impact if not applied : Message Buffer outage will occur under heavy loaded coex scenario
 *                         involving Wi-Fi and/or BT/BLE concurrently with Thread.
@@ -42,15 +42,15 @@
 Upstream-Status: Inappropriate  [platform specific changes]
 
 diff --git a/src/core/config/misc.h b/src/core/config/misc.h
-index 27a11e806..c1fae385f 100644
+index 5dc48d648..36f3caa80 100644
 --- a/src/core/config/misc.h
 +++ b/src/core/config/misc.h
-@@ -156,7 +156,7 @@
-  *
+@@ -193,7 +193,7 @@
+  * The number of message buffers in the buffer pool.
   */
  #ifndef OPENTHREAD_CONFIG_NUM_MESSAGE_BUFFERS
 -#define OPENTHREAD_CONFIG_NUM_MESSAGE_BUFFERS 44
 +#define OPENTHREAD_CONFIG_NUM_MESSAGE_BUFFERS 200
  #endif
- 
+
  /**

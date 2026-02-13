@@ -86,7 +86,7 @@ repo:
 
   uboot:
     url:  https://github.com/varigit/uboot-imx.git
-    commit: df4294afa29d98060fe05290942a76e0d3dfb16c
+    commit: e85b40963412bba954ab0e7572dc10e133683cd7
 
   rcw:
     url:  https://github.com/nxp-qoriq/rcw.git
@@ -137,7 +137,7 @@ repo:
 
   imx_firmware:
     url:  https://github.com/NXP/imx-firmware.git
-    tag:  lf-6.12.49-2.2.0
+    tag:  lf-6.12.20-2.0.0
     # firmware for wifi/bt
 
   brcm_lwb_firmware:
@@ -158,7 +158,7 @@ repo:
 
   openthread_iwxxx_spi:
     url: https://github.com/openthread/openthread.git
-    commit: 9681690fab100590566e4937cbf2d072de031ff3
+    commit: d31bcee81230bd82764838c76c9f291ba64814dd
 
   imx_sc_firmware:
     url: https://github.com/varigit/imx-sc-firmware.git
@@ -167,7 +167,7 @@ repo:
 # kernel and modules git repositories
   linux:
     url:  https://github.com/varigit/linux-imx.git
-    commit: fe3a35cdc16e7dfd63ff19d5b8dbc5cd32485494
+    commit: e71e2277b2894b7b0984d1daa2652884990fecba
 
   cryptodev_linux:
     url:  https://github.com/cryptodev-linux/cryptodev-linux.git
@@ -416,14 +416,15 @@ repo:
 # connectivity component repositories
   nxp_wlan_bt:
     url:  https://github.com/nxp-imx/mwifiex.git
+    tag: lf-6.12.20-2.0.0
 
   meta_variscite_bsp_common:
     url: https://github.com/varigit/meta-variscite-bsp-common.git
-    commit: 3444cb784cc7f769dfc8cdbf236878c571298bfa
+    commit: c859d37a8635af79ce064e9c77af282a07987998
 
   meta_variscite_bsp_imx:
     url: https://github.com/varigit/meta-variscite-bsp-imx.git
-    commit: 25728e480cc65c4d5f010b980777a4ba4923396e
+    commit: b2596903c85b6ac42b90f36593e88e217ce5701f
 
 # bsp components repositories
   freertos_variscite:
@@ -432,7 +433,7 @@ repo:
 
   meta_variscite_sdk_common:
     url: https://github.com/varigit/meta-variscite-sdk-common.git
-    commit: 7967f8724ead496345720d06ecc23891c237671d
+    commit: 31fd47933f01d4bd652554a2d903a97fa8a76ab2
 
 # generic component repositories
   imx_test:

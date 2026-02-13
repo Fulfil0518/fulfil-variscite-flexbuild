@@ -1,6 +1,6 @@
 /*
 *  Copyright (c) 2020, The OpenThread Authors.
-*  Copyright 2023-2024 NXP
+*  Copyright 2024 NXP
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -29,24 +29,27 @@
 
 /*
 * Header for patch information.
-* Description           : Config change to support up to 128 attached SEDs.
-* Version               : v002
-* Mandatory/Optional    : Optional
-* Impact if not applied : Only up to 64 SEDs can be attached.
+* Description : Fix MbedTls build errors
+* Version : v001
+* Mandatory/Optional : Mandatory from 6.12.3 BSP
+* Impact if not applied : can't build
 */
 
-Upstream-Status: Inappropriate  [platform specific changes]
+Upstream-Status: Inappropriate [platform specific changes]
 
-diff --git a/src/posix/platform/openthread-core-posix-config.h b/src/posix/platform/openthread-core-posix-config.h
-index ebe784f45..f1f819f12 100644
---- a/src/posix/platform/openthread-core-posix-config.h
-+++ b/src/posix/platform/openthread-core-posix-config.h
-@@ -101,7 +101,7 @@
- #endif
- 
- #ifndef OPENTHREAD_CONFIG_MLE_MAX_CHILDREN
--#define OPENTHREAD_CONFIG_MLE_MAX_CHILDREN 64
-+#define OPENTHREAD_CONFIG_MLE_MAX_CHILDREN 128
- #endif
- 
- #ifndef OPENTHREAD_CONFIG_MLE_IP_ADDRS_PER_CHILD
+diff --git a/third_party/mbedtls/repo/library/common.h b/third_party/mbedtls/repo/library/common.h
+index 3936ffdfe..d8c407319 100644
+--- a/third_party/mbedtls/repo/library/common.h
++++ b/third_party/mbedtls/repo/library/common.h
+@@ -199,7 +199,7 @@ static inline void mbedtls_xor(unsigned char *r,
+         uint8x16_t x = veorq_u8(v1, v2);
+         vst1q_u8(r + i, x);
+     }
+-#if defined(__IAR_SYSTEMS_ICC__)
++#if defined(__IAR_SYSTEMS_ICC__) || defined(MBEDTLS_COMPILER_IS_GCC)
+     /* This if statement helps some compilers (e.g., IAR) optimise out the byte-by-byte tail case
+      * where n is a constant multiple of 16.
+      * For other compilers (e.g. recent gcc and clang) it makes no difference if n is a compile-time
+-- 
+2.43.0
+

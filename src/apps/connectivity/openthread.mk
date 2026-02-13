@@ -57,6 +57,7 @@ openthread:
 			-DOT_THREAD_VERSION=1.3 \
 			-DCMAKE_BUILD_TYPE=Release \
 			-DOT_RCP_RESTORATION_MAX_COUNT=10 \
+			-DOT_POSIX_RCP_HDLC_BUS=ON \
 	" && \
 	mkdir -p $$SOURCE/build_$(DISTROTYPE)_$(ARCH) && \
 	cmake $$OT_OPT . -B build_$(DISTROTYPE)_$(ARCH) && \

@@ -30,16 +30,16 @@
 /*
 * Header for patch information.
 * Description           : This patch releases resources when ot-daemon should be exits on error. It also add debug traces.
-* Version               : v003
+* Version               : v004
 * Mandatory/Optional    : Mandatory
 * Impact if not applied : When ot-deamon exits on error, it cannot be re-started because the gpio
 *                         resources have not been released before exiting.
 */
 
-Upstream-Status: Inappropriate  [platform specific changes]
+Upstream-Status: Inappropriate [platform specific changes]
 
 diff --git a/src/posix/platform/hdlc_interface.cpp b/src/posix/platform/hdlc_interface.cpp
-index 12726fc72..c50a3c580 100644
+index 321bfbae2..f6dc11bb3 100644
 --- a/src/posix/platform/hdlc_interface.cpp
 +++ b/src/posix/platform/hdlc_interface.cpp
 @@ -183,6 +183,7 @@ HdlcInterface::~HdlcInterface(void) { Deinit(); }
@@ -50,13 +50,11 @@ index 12726fc72..c50a3c580 100644
      CloseFile();
  
      mReceiveFrameCallback = nullptr;
-Upstream-Status: Inappropriate  [platform specific changes]
-
 diff --git a/src/posix/platform/spi_interface.cpp b/src/posix/platform/spi_interface.cpp
-index 9d7860b34..5f4421ab5 100644
+index 4c196f195..63e9a0691 100644
 --- a/src/posix/platform/spi_interface.cpp
 +++ b/src/posix/platform/spi_interface.cpp
-@@ -172,6 +172,7 @@ SpiInterface::~SpiInterface(void) { Deinit(); }
+@@ -174,6 +174,7 @@ SpiInterface::~SpiInterface(void) { Deinit(); }
  
  void SpiInterface::Deinit(void)
  {
@@ -64,27 +62,22 @@ index 9d7860b34..5f4421ab5 100644
      if (mSpiDevFd >= 0)
      {
          close(mSpiDevFd);
-Upstream-Status: Inappropriate  [platform specific changes]
-
 diff --git a/src/posix/platform/system.cpp b/src/posix/platform/system.cpp
-index c209d63aa..bbe9aa5d1 100644
+index 5f3640a56..f022c6180 100644
 --- a/src/posix/platform/system.cpp
 +++ b/src/posix/platform/system.cpp
-@@ -61,6 +61,8 @@
- otInstance *gInstance = nullptr;
- bool        gDryRun   = false;
+@@ -131,10 +131,14 @@ void otSysSetInfraNetif(const char *aInfraNetifName, int aIcmp6Socket)
+ }
+ #endif
  
-+void platformDeinit(void);
++void platformDeinitRcpMode(void);
 +
- #if OPENTHREAD_CONFIG_PLATFORM_NETIF_ENABLE || OPENTHREAD_CONFIG_BACKBONE_ROUTER_ENABLE
- static void processStateChange(otChangedFlags aFlags, void *aContext)
+ void platformInitRcpMode(otPlatformConfig *aPlatformConfig)
  {
-@@ -136,6 +136,8 @@ void platformInit(otPlatformConfig *aPlatformConfig)
-     platformAlarmInit(aPlatformConfig->mSpeedUpFactor, aPlatformConfig->mRealTimeSignal);
-     platformRadioInit(get802154RadioUrl(aPlatformConfig));
+     platformRadioInit(get802154RadioUrl(aPlatformConfig->mCoprocessorUrls));
  
-+    atexit(&platformDeinit);
++    atexit(&platformDeinitRcpMode);
 +
-     // For Dry-Run option, only init the radio.
+     // For Dry-Run option, only init the co-processor.
      VerifyOrExit(!aPlatformConfig->mDryRun);
  
