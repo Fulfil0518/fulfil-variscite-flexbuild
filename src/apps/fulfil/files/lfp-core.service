@@ -1,11 +1,13 @@
 [Unit]
 Description=Rover LFP1 Core Firmware
+ConditionPathExists=/opt/fulfil/firstboot.done
 
 [Service]
 Type=simple
 ExecStartPre=/bin/sleep 5
 ExecStart=/home/usrFtp/code/lfp-core
 Environment="LOGTRACE=0"
+Restart=always
 
 [Install]
 WantedBy=multi-user.target

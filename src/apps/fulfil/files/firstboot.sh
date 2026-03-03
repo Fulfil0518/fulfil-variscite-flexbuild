@@ -164,6 +164,8 @@ echo "CATTLE_NEW_SIGNED_CERT_EXPIRATION_DAYS=3650" > /etc/systemd/system/k3s.ser
 
 # In today's things that make me very sad
 export INSTALL_K3S_VERSION=${INSTALL_K3S_VERSION:-"v1.32.0+k3s1"} #for lfps
+export INSTALL_K3S_SKIP_ENABLE=true # we'll enable it ourselves later once we're at TAN and have the right node labels set
+export INSTALL_K3S_SKIP_START=true # we'll start it ourselves later once we're at TAN and have the right node labels set
 curl -sfL "https://get.k3s.io/" > /root/k3s.sh && \
 	chmod +x /root/k3s.sh && \
 	/root/k3s.sh --docker \
@@ -218,8 +220,8 @@ cp /opt/fulfil/authorized_keys /root/.ssh/
 # Remove firstboot bootstrap script
 echo "Removing firstboot script..."
 rm /opt/fulfil/firstboot.sh
-rm /etc/systemd/system/multi-user.target.wants/firstboot.service
-systemctl disable k3s.service # disable k3s to be re-enabled later by us once at TAN
+rm /etc/systemd/system/multi-user.target.wants/fulfil-firstboot.service
+touch /opt/fulfil/firstboot.done
 
 # Shutdown
 echo "Shutting down..."

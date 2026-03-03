@@ -166,8 +166,8 @@ repo:
 
 # kernel and modules git repositories
   linux:
-    url:  https://github.com/varigit/linux-imx.git
-    commit: e71e2277b2894b7b0984d1daa2652884990fecba
+    url:  https://github.com/Fulfil0518/fulfil-variscite-debian-kernel.git
+    commit: 54cd3f7a4af1521f8272519bfd248a67698cd373
 
   cryptodev_linux:
     url:  https://github.com/cryptodev-linux/cryptodev-linux.git

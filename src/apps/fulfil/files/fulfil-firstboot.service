@@ -8,5 +8,5 @@ ConditionPathExists=!/usr/bin/install_debian.sh
 EnvironmentFile=/etc/environment
 Type=oneshot
 ExecStart=/opt/fulfil/firstboot.sh
-TimeoutSec=300
+TimeoutSec=3600
 Restart=on-abnormal
