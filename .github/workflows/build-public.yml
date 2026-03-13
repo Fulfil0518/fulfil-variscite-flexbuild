@@ -8,13 +8,19 @@
 #   - Prepare a Docker build environment (restore cached image or build it)
 #   - Use that container to compile U-Boot, Linux, rootfs and images
 
-name: Build all machines - Public
+name: Build Debian Bookworm Image
 
 on:
-  push:
-    branches:
-      - '**'
   workflow_dispatch:
+    inputs:
+      kernel_version_name:
+        description: 'A unique name used to help describe the kernel for human readability. This will be combined with other identifiers in the final version string. Please only use alphanumeric or -'
+        type: string
+        required: true
+      kernel_commit:
+        description: 'The commit for https://github.com/Fulfil0518/fulfil-variscite-debian-kernel'
+        type: string
+        required: true
 
 jobs:
   build-flexbuild:
@@ -25,15 +31,7 @@ jobs:
     strategy:
       matrix:
         machine:
-          - imx8mm-var-dart
-          - imx8mp-var-dart
           - imx8mn-var-som
-          - imx95-var-dart
-          - imx93-var-som
-          - imx8qxp-var-som
-          - imx91-var-som
-          - imx8mq-var-dart
-          - imx8qm-var-som
         rootfs:
           - server
           - desktop
@@ -145,53 +143,63 @@ jobs:
             time bld host-dep
           '
 
+      - name: Verify template
+        run: |
+          docker exec "$CONTAINER_NAME" /bin/bash -c '
+            . setup.env || true
+            export KERNEL_VERSION="${{ inputs.kernel_version_name }}"
+            export KERNEL_COMMIT="${{ inputs.kernel_commit }}"
+            envsubst < configs/ci.yml.template > configs/ci.yml
+            cat configs/ci.yml
+          '
+
       - name: Build U-Boot
         run: |
           docker exec "$CONTAINER_NAME" /bin/bash -c '
             . setup.env || true
-            bld -r debian:${{ matrix.rootfs }} -m ${{ matrix.machine }} -f sdk-var.yml uboot
+            bld -r debian:${{ matrix.rootfs }} -m ${{ matrix.machine }} -f ci.yml uboot
           '
 
       - name: Build Linux
         run: |
           docker exec "$CONTAINER_NAME" /bin/bash -c '
             . setup.env || true
-            bld -r debian:${{ matrix.rootfs }} -m ${{ matrix.machine }} -f sdk-var.yml linux
+            bld -r debian:${{ matrix.rootfs }} -m ${{ matrix.machine }} -f ci.yml linux
           '
 
       - name: Build root filesystem
         run: |
           docker exec "$CONTAINER_NAME" /bin/bash -c '
             . setup.env || true
-            bld -r debian:${{ matrix.rootfs }} -m ${{ matrix.machine }} -f sdk-var.yml rfs
+            bld -r debian:${{ matrix.rootfs }} -m ${{ matrix.machine }} -f ci.yml rfs
           '
 
       - name: Build applications
         run: |
           docker exec "$CONTAINER_NAME" /bin/bash -c '
             . setup.env || true
-            bld -r debian:${{ matrix.rootfs }} -m ${{ matrix.machine }} -f sdk-var.yml apps
+            bld -r debian:${{ matrix.rootfs }} -m ${{ matrix.machine }} -f ci.yml apps
           '
 
       - name: Merge applications into rootfs
         run: |
           docker exec "$CONTAINER_NAME" /bin/bash -c '
             . setup.env || true
-            bld -r debian:${{ matrix.rootfs }} -m ${{ matrix.machine }} -f sdk-var.yml merge-apps
+            bld -r debian:${{ matrix.rootfs }} -m ${{ matrix.machine }} -f ci.yml merge-apps
           '
 
       - name: Merge boot partition and rootfs
         run: |
           docker exec "$CONTAINER_NAME" /bin/bash -c '
             . setup.env || true
-            bld -r debian:${{ matrix.rootfs }} -m ${{ matrix.machine }} -f sdk-var.yml merge-bootpart-rfs
+            bld -r debian:${{ matrix.rootfs }} -m ${{ matrix.machine }} -f ci.yml merge-bootpart-rfs
           '
 
       - name: Create recovery SD-card image
         run: |
           docker exec "$CONTAINER_NAME" /bin/bash -c '
             . setup.env || true
-            bld -r debian:${{ matrix.rootfs }} -m ${{ matrix.machine }} -f sdk-var.yml create-recovery-sdcard-image
+            bld -r debian:${{ matrix.rootfs }} -m ${{ matrix.machine }} -f ci.yml create-recovery-sdcard-image
           '
 
       - name: Upload packaged recovery image
