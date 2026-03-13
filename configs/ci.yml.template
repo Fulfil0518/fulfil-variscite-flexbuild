@@ -52,9 +52,8 @@ CONFIG_FUSE_PROVISIONING: n
 
 INSTALL_DESKTOP_TEST_PACKAGES: n
 
-# user can customize the default path of components source and build output path
-DEFAULT_OUT_PATH: $FBDIR/build_${DISTRIB_VERSION}
-DEFAULT_PKGDIR: $FBDIR/components_${DISTRIB_VERSION}
+DEFAULT_OUT_PATH: $FBDIR/build_lsdk2412
+DEFAULT_PKGDIR: $FBDIR/components_lsdk2412
 
 
 # default kernel config list
