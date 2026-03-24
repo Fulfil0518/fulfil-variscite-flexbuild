@@ -9,13 +9,11 @@ DEV=${DEV:(-4)} # this needs to be able to handle multiple devices eventually.
                 # this will work for now
 DEV=/dev/$DEV
 echo $DEV
-mkdir -p /media/usb/
-mount $DEV /media/usb/
+ls /media/dev/*sda*
 
 if [ $? -eq 0 ]; then
     echo "$DEV Mounted"
-    cp main.py /media/usb/
-    umount $DEV
+    cp main.py /media/usb/*sda*
     echo "files sent"
     rm -f /etc/systemd/system/multi-user.target.wants/fulfil-camera-install.service \
         /etc/systemd/system/fulfil-camera-install.service
