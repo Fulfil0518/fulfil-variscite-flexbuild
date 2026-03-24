@@ -1,6 +1,52 @@
 import image, network, math, rpc, sensor, struct, tf, time, mutex, pyb, micropython, omv
 from pyb import LED
 
+# Compatibility shim: newer firmware removed rpc_usb_vcp_* helpers.
+# Keep existing app/SOM RPC API by providing a USB VCP transport wrapper.
+if (not hasattr(rpc, "rpc_usb_vcp_slave")) and hasattr(rpc, "rpc_slave"):
+    class _RPCUsbVCPSlaveCompat(rpc.rpc_slave):
+        def __init__(self):
+            self._vcp = pyb.USB_VCP()
+            rpc.rpc_slave.__init__(self)
+
+        def _flush(self):
+            while self._vcp.any():
+                self._vcp.read()
+
+        def get_bytes(self, buff, timeout_ms):
+            start = pyb.millis()
+            i = 0
+            l = len(buff)
+            while l:
+                n = self._vcp.any()
+                if n:
+                    data = self._vcp.read(min(l, n))
+                    if data:
+                        dlen = len(data)
+                        buff[i:i + dlen] = data
+                        i += dlen
+                        l -= dlen
+                        continue
+                if (pyb.millis() - start) >= timeout_ms:
+                    return None
+            return buff
+
+        def put_bytes(self, data, timeout_ms):
+            start = pyb.millis()
+            i = 0
+            l = len(data)
+            while i < l:
+                n = self._vcp.write(data[i:])
+                if n is None:
+                    n = 0
+                if n > 0:
+                    i += n
+                    continue
+                if (pyb.millis() - start) >= timeout_ms:
+                    raise OSError("USB VCP write timeout")
+
+    rpc.rpc_usb_vcp_slave = _RPCUsbVCPSlaveCompat
+
 class Tag:
     def __init__(self):
         self.tag_dst = struct.pack("<HHHH", 0, 0, 0, 0)
@@ -65,6 +111,23 @@ def saveImage(data):
     if image_count > 999:
         image_count = 0
 start = pyb.millis()
+
+def _tag_value(tag, name):
+    value = getattr(tag, name)
+    if callable(value):
+        return value()
+    return value
+
+def _pack_tag(tag):
+    cx = int(_tag_value(tag, "cx")) & 0xFFFF
+    cy = int(_tag_value(tag, "cy")) & 0xFFFF
+    tag_id = int(_tag_value(tag, "id")) & 0xFFFF
+    rot = _tag_value(tag, "rotation")
+    if abs(rot) <= (2 * math.pi + 0.1):
+        rot = math.degrees(rot)
+    rot_u16 = int(rot) % 360
+    return struct.pack("<HHHH", cx, cy, tag_id, rot_u16)
+
 def ISRCallback(data):
     global start
     global ping
@@ -102,11 +165,7 @@ def ISRCallback(data):
             tags[buff_idx].tag_time = pyb.millis()
 
             LED(2).on()
-            tags[buff_idx].tag_dst = struct.pack("<HHHH",
-                    tags_found[0].cx,
-                    tags_found[0].cy,
-                    tags_found[0].id,
-                    int(math.degrees(tags_found[0].rotation)))
+            tags[buff_idx].tag_dst = _pack_tag(tags_found[0])
             tags[buff_idx].mutex.release()
             if not VCP:
                 print("Tag found:[cx=%d, cy=%d, id=%d, rot=%d]" \
@@ -205,7 +264,7 @@ while(True):
     #    t = apriltag_detection(None)
     try: #wrapping to guard against throwing inside a CB
         interface.loop()
-    except:
+    except Exception:
         #with an unexpected failure reset_board
         if VCP:
             pyb.hard_reset()
