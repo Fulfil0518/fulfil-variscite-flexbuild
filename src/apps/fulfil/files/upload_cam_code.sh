@@ -1,25 +1,18 @@
 #!/bin/bash
 set -e
 
-echo 'WARNING: this will only work for the last usb mass storage device'
-echo
-DEV=$(ls -l /dev/disk/by-id/usb*)
-DEV=${DEV:(-4)} # this needs to be able to handle multiple devices eventually.
-                # should probably be parsing and looking for MicroPy but
-                # this will work for now
-DEV=/dev/$DEV
-echo $DEV
-ls /media/dev/*sda*
+echo 'WARNING: this will only work for the default camera device dir on LFPs in their automounted state'
+
+ls /run/media/
 
 if [ $? -eq 0 ]; then
-    echo "$DEV Mounted"
-    cp main.py /media/usb/*sda*
+    cp main.py /run/media/*sda*
     echo "files sent"
     rm -f /etc/systemd/system/multi-user.target.wants/fulfil-camera-install.service \
         /etc/systemd/system/fulfil-camera-install.service
     systemctl daemon-reload
     exit 0
 else
-    echo "$DEV not Mounted"
+    echo "Device not Mounted"
     exit 1
 fi
