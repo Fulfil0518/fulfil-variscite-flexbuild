@@ -81,8 +81,6 @@ sensor.set_pixformat(sensor.GRAYSCALE)
 sensor.set_framesize(sensor.B128X128)
 sensor.skip_frames(time = 2000)
 
-if VCP:
-    omv.disable_fb(True) #disable jpeg compression of images for stream to OpenMV IDE
 image_count=0
 clock = time.clock()
 
