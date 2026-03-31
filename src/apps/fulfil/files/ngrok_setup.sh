@@ -16,7 +16,7 @@ if [ "$(id -u)" -ne 0 ]; then
   exit 1
 fi
 
-echo "[1/4] Installing/ensuring ngrok apt repo and package"
+echo "[1/5] Installing/ensuring ngrok apt repo and package"
 
 # Add ngrok GPG key (idempotent: overwrite same file)
 curl -sSL https://ngrok-agent.s3.amazonaws.com/ngrok.asc \
@@ -30,13 +30,13 @@ apt update
 apt install -y ngrok
 
 
-echo "[2/4] Copy ngrok service config to ${NGROK_CONFIG_PATH}"
+echo "[2/5] Copy ngrok service config to ${NGROK_CONFIG_PATH}"
 
 mkdir -p "$(dirname "${NGROK_CONFIG_PATH}")"
 cp /opt/fulfil/ngrok.yml "${NGROK_CONFIG_PATH}"
 
 
-echo "[3/4] Installing ngrok as a service (idempotent)"
+echo "[3/5] Installing ngrok as a service (idempotent)"
 
 if systemctl is-active --quiet ngrok; then
   echo "ngrok systemd service already installed, skipping ngrok service install"
@@ -44,7 +44,21 @@ else
   ngrok service install --config="${NGROK_CONFIG_PATH}"
 fi
 
-echo "[4/4] Starting ngrok service"
+echo "[4/5] Adding location guard to ngrok service"
+
+install -m 0755 /opt/fulfil/ngrok-location-check.sh /usr/local/sbin/ngrok-location-check.sh
+
+mkdir -p /etc/systemd/system/ngrok.service.d
+cat > /etc/systemd/system/ngrok.service.d/location-guard.conf <<'EOF'
+[Service]
+ExecCondition=/usr/local/sbin/ngrok-location-check.sh
+Restart=on-failure
+RestartSec=30
+EOF
+
+systemctl daemon-reload
+
+echo "[5/5] Starting ngrok service"
 
 ngrok service start || true
 
