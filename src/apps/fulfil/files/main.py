@@ -76,6 +76,13 @@ micropython.alloc_emergency_exception_buf(100)
 #Set false to debug
 VCP = True
 
+# Disable USB mass storage. The new OpenMV firmware exposes the internal FAT
+# filesystem as USB MSC by default, even in application mode. If the camera
+# resets unexpectedly while Linux has sda1 dirty-mounted, the FAT boot sector
+# can't be flushed and the filesystem gets corrupted — OpenMV then re-initializes
+# it to factory defaults, wiping main.py. VCP-only mode prevents this entirely.
+pyb.usb_mode('VCP')
+
 sensor.reset()
 sensor.set_pixformat(sensor.GRAYSCALE)
 sensor.set_framesize(sensor.B128X128)
