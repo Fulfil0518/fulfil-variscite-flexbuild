@@ -1,8 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SRC="$SCRIPT_DIR/main.py"
+SRC="/root/main.py"
 
 echo 'WARNING: this will only work for the default camera device dir on LFPs in their automounted state'
 
