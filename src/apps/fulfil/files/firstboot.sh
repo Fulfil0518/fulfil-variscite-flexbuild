@@ -4,7 +4,7 @@
 # are unique to a given node.
 set -x
 # Kubernetes node configuration
-CONF_NODE_LABELS="fulfil.ai/model=lfp fulfil.ai/location=tan"
+CONF_NODE_LABELS="fulfil.ai/model=lfp"
 
 sleep 10 # wait for NetworkManager to comeup (for some reason takes sec)
 # Set up networking if it doesn't exist
