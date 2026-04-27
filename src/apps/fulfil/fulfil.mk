@@ -39,3 +39,7 @@ app-$(APP_NAME):
 		$(RFSDIR)/etc/systemd/system/lfp-core.service
 	ln -sf /etc/systemd/system/lfp-core.service \
 		$(RFSDIR)/etc/systemd/system/multi-user.target.wants/lfp-core.service
+
+	# 7. Install OpenMV camera udev ignorelist (prevents FAT corruption on camera reset)
+	install -d $(RFSDIR)/etc/udev/mount.ignorelist.d
+	echo "/dev/sda" > $(RFSDIR)/etc/udev/mount.ignorelist.d/openmv-camera
