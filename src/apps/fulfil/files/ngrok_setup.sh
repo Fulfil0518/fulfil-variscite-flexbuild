@@ -51,7 +51,7 @@ install -m 0755 /opt/fulfil/ngrok-location-check.sh /usr/local/sbin/ngrok-locati
 mkdir -p /etc/systemd/system/ngrok.service.d
 cat > /etc/systemd/system/ngrok.service.d/location-guard.conf <<'EOF'
 [Service]
-ExecCondition=/usr/local/sbin/ngrok-location-check.sh
+ExecStartPre==/usr/local/sbin/ngrok-location-check.sh
 Restart=on-failure
 RestartSec=30
 EOF
