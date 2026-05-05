@@ -1,0 +1,124 @@
+ARG PROJECT=fulfil-web-staging-296222
+FROM gcr.io/$PROJECT/firmware-build-tools AS dev-environment
+RUN apt update                          \
+    && DEBIAN_FRONTEND=noninteractive   \
+    apt install -y                      \
+    --no-install-recommends             \
+    sudo                                \
+    ssh                                 \
+    bash-completion                     \
+    build-essential                     \
+    rsync                               \
+    bc                                  \
+    tmux                                \
+    gitk                                \
+    vim                                 \
+    nano                                \
+    autoconf                            \
+    libtool                             \
+    pkg-config                          \
+    libgpiod-dev                        \
+    locales-all                         \
+    iputils-ping                        \
+    lsb-release                         \
+    software-properties-common          \
+    gnupg                               \
+    python3                             \
+    gdb                                 \
+    silversearcher-ag                   \
+    python3-pip                         \
+    flex                                \
+    # necessary for using passwords w/ ansible
+    sshpass
+
+# install toolchain for building Python
+RUN apt-get update && apt-get install -y --no-install-recommends \
+     build-essential curl git ca-certificates \
+     libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev \
+     libffi-dev liblzma-dev uuid-dev && \
+     rm -rf /var/lib/apt/lists/*
+
+# install 3.11 via pyenv
+ENV PYENV_ROOT=/usr/local/pyenv
+ENV PATH="$PYENV_ROOT/bin:$PYENV_ROOT/shims:$PATH"
+
+RUN curl -fsSL https://pyenv.run | bash && \
+    pyenv install 3.11.9 && \
+    pyenv global 3.11.9 && \
+    pyenv rehash && \
+    command -v python && python -V && \
+    python -m ensurepip && \
+    python -m pip install --upgrade pip
+
+RUN python3 -m venv /opt/venv
+
+# Get LLVM tools
+ARG VER_LLVM=18
+RUN wget -qO- https://apt.llvm.org/llvm.sh | bash -s -- ${VER_LLVM} all
+RUN ln -sf /usr/bin/clang-format-${VER_LLVM} /usr/local/bin/clang-format
+
+# Set up pip packages
+RUN /opt/venv/bin/pip install --upgrade pip \
+    && /opt/venv/bin/pip install ansible==12.0.0 pre-commit
+
+# COPY ansible/requirements.yml /tmp/requirements.yml
+
+# RUN /opt/venv/bin/ansible-galaxy collection install -r /tmp/requirements.yml \
+#     && rm -f /tmp/requirements.yml
+
+# Set up grpcurl
+ARG VER_GRPCURL=1.9.3
+RUN . /tmp/env.sh \
+    && if [ "$HW_N" = "x86_64" ]; then FLAVOR="x86_64"; else FLAVOR="arm64"; fi \
+    && wget -O - https://github.com/fullstorydev/grpcurl/releases/download/v${VER_GRPCURL}/grpcurl_${VER_GRPCURL}_linux_${FLAVOR}.tar.gz \
+    | tar -xz -C /usr/local/bin
+
+# Set up non-root user
+ARG NONROOTUSER=developer
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
+RUN groupadd --gid $USER_GID $NONROOTUSER \
+    && useradd --uid $USER_UID --gid $USER_GID -m $NONROOTUSER \
+    && echo $NONROOTUSER ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$NONROOTUSER \
+    && chmod 0440 /etc/sudoers.d/$NONROOTUSER
+
+# Set up missing permissions for testing in container
+# mkdir /code and give ownership to non-root user - spdlog dumps logs to /code
+# RUN mkdir /code && chown -R $USER_UID:$USER_GID /code
+# RUN mkdir -p /home/$NONROOTUSER/.ansible \
+#     && chown -R $USER_UID:$USER_GID /home/$NONROOTUSER/.ansible
+# RUN mkdir -p /home/$NONROOTUSER/.ansible/tmp \
+#     && chown -R $USER_UID:$USER_GID /home/$NONROOTUSER/.ansible/tmp
+
+ARG CONTAINERUSER=${NONROOTUSER}
+ENV CONTAINERUSER=${CONTAINERUSER} HOME=/home/${CONTAINERUSER}
+
+# Append the history-sharing snippet to both global and user rc files without using heredocs
+RUN set -eu; \
+    userhome="/home/${CONTAINERUSER}"; \
+    mkdir -p "${userhome}"; \
+    touch "${userhome}/.bashrc"; \
+    chown ${CONTAINERUSER}:${CONTAINERUSER} "${userhome}/.bashrc"; \
+    for f in /etc/bash.bashrc "${userhome}/.bashrc"; do \
+      printf '%s\n' \
+'# --- shared host/container history ---' \
+'shopt -s histappend' \
+'export HISTFILE=${HISTFILE:-$HOME/.bash_history}' \
+'export HISTSIZE=${HISTSIZE:-1000000}' \
+'export HISTFILESIZE=${HISTFILESIZE:-2000000}' \
+'export HISTCONTROL=${HISTCONTROL:-ignoredups:erasedups}' \
+'if [[ -n "$PROMPT_COMMAND" ]]; then' \
+'  PROMPT_COMMAND="history -a; history -n; $PROMPT_COMMAND"' \
+'else' \
+'  PROMPT_COMMAND="history -a; history -n"' \
+'fi' \
+'# -------------------------------------' \
+>> "$f"; \
+    done
+
+# Activate the python venv in bash
+RUN echo "source /opt/venv/bin/activate" >> /etc/bash.bashrc
+
+# Default to the non-root user & bash login shells
+USER ${CONTAINERUSER}
+SHELL ["/bin/bash", "-lc"]

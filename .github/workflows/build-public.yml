@@ -9,6 +9,7 @@
 #   - Use that container to compile U-Boot, Linux, rootfs and images
 
 name: Build Debian Bookworm Image
+run-name: Build Debian Bookworm Image (${{ inputs.kernel_version_name }})
 
 on:
   workflow_dispatch:
@@ -21,6 +22,9 @@ on:
         description: 'The commit for https://github.com/Fulfil0518/fulfil-variscite-debian-kernel'
         type: string
         required: true
+
+env:
+  SOPS_PRIVATE_KEY: ${{ secrets.SOPS_PRIVATE_KEY }}
 
 jobs:
   build-flexbuild:
@@ -153,6 +157,36 @@ jobs:
             envsubst < configs/ci.yml.template > configs/ci.yml
             cat configs/ci.yml
           '
+      
+      - name: Setup SOPS packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gnupg
+          curl -LO https://github.com/getsops/sops/releases/download/v3.12.2/sops_3.12.2_amd64.deb
+          sudo apt-get install -y ./sops_3.12.2_amd64.deb
+          rm ./sops_3.12.2_amd64.deb
+
+      - name: Setup SOPS private key
+        run: |
+          export GNUPGHOME="$(mktemp -d)"
+          chmod 700 "$GNUPGHOME"
+          echo "GNUPGHOME=$GNUPGHOME" >> "$GITHUB_ENV"
+
+          printf '%s\n' "$SOPS_PRIVATE_KEY" | gpg --batch --import
+      
+      - name: Decrypt SOPS files
+        run: |
+          set -euo pipefail
+          for src in src/apps/fulfil/secrets/*.sops; do
+            [ -e "$src" ] || continue
+
+            base="$(basename "$src" .sops)"
+            dst="src/apps/fulfil/files/$base"
+
+            echo "Decrypting $src -> $dst"
+            sops -d --input-type binary "$src" > "$dst"
+            chmod 600 "$dst"
+          done
 
       - name: Build U-Boot
         run: |
