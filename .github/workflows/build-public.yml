@@ -39,7 +39,7 @@ jobs:
           - imx8mn-var-som
         rootfs:
           - server
-          - desktop
+          # - desktop
 
     steps:
       # GitHub-hosted runners expose additional space under /mnt.
