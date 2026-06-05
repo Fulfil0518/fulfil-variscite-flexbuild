@@ -1,0 +1,40 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/cpp
+{
+	"name": "Flexbuild env",
+	"build": {
+		// sets the path context to project root so we can copy files
+		// relative to the project root
+		"context": ".",
+		"dockerfile": "docker/Dockerfile.dev",
+		"args": {
+			// specify values for any ARGs in Dockerfile
+			"BUILDKIT_INLINE_CACHE": "1",
+		}
+	},
+	"containerEnv": {
+		// unified cache location
+		// "XDG_CACHE_HOME": "${containerWorkspaceFolder}/MarsControl/.cache",
+	},
+	"runArgs": [
+		// ansible playbooks
+		"--network=host",
+		// uniform naming
+		"--name", "flexbuild-linux-dev-environment-vsc",
+	],
+	"customizations": {
+		"vscode": {
+			"settings": {
+                "terminal.integrated.defaultProfile.linux": "bash",
+            },
+			"extensions": [
+				// language server
+				"llvm-vs-code-extensions.vscode-clangd",
+				// cmake CMakeLists.txt formatter
+				"cheshirekow.cmake-format",
+				// git
+				"eamodio.gitlens",
+			],
+		}
+	},
+}

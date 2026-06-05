@@ -11,6 +11,7 @@ app-$(APP_NAME):
 	install -d $(RFSDIR)/etc/systemd/system/multi-user.target.wants
 
 	# 2. Copy assets
+	@find "$(CURDIR)/fulfil/files" -mindepth 1 -print
 	cp -a $(CURDIR)/fulfil/files/* $(RFSDIR)/opt/fulfil/
 	
 	# 3. Install the firstboot script with executable permissions
