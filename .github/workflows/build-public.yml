@@ -247,3 +247,29 @@ jobs:
             build_lsdk2412/images/rootfs_lsdk2412_debian_${{ matrix.rootfs }}_arm64.tar.zst
           if-no-files-found: error
           retention-days: 90
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCS_SECRET }}
+
+      - name: Build GCS directory name
+        id: upload-dir
+        shell: bash
+        run: |
+          KERNEL_VERSION_NAME="${{ inputs.kernel_version_name }}"
+          KERNEL_COMMIT="${{ inputs.kernel_commit }}"
+          BUILD_TIMESTAMP="$(date -u +'%Y%m%dT%H%M%SZ')"
+
+          SAFE_KERNEL_VERSION_NAME="$(echo "$KERNEL_VERSION_NAME" | sed 's/[^A-Za-z0-9-]/-/g')"
+
+          DIR_NAME="${BUILD_TIMESTAMP}-${SAFE_KERNEL_VERSION_NAME}-${KERNEL_COMMIT_SHORT}"
+
+          echo "value=$DIR_NAME" >> "$GITHUB_OUTPUT"
+          echo "GCS bucket dir: $DIR_NAME"
+
+      - name: Upload recovery image to GCS
+        uses: google-github-actions/upload-cloud-storage@v2
+        with:
+          path: build_lsdk2412/images/
+          destination: varsom-debian-image/${{ steps.upload-dir.outputs.value }}
