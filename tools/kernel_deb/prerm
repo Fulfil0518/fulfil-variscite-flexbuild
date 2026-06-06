@@ -1,0 +1,10 @@
+#!/bin/bash
+set -euo pipefail
+
+case "$1" in
+  remove|deconfigure)
+    echo "Cannot remove kernel package. Removing would clear kernel files and brick the system."
+    echo "Please install another kernel package on top instead"
+    exit 1
+    ;;
+esac

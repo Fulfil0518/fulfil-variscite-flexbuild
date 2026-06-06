@@ -24,9 +24,9 @@ ap_scan=1
 fast_reauth=1
 EOL
 
-WIFI_SECRETS_FILE="/opt/fulfil/wifi-secrets.env"
+WIFI_SECRETS_FILE="/opt/fulfil/lfp/wifi-secrets.env"
 if [ -f "$WIFI_SECRETS_FILE" ]; then
-	# shellcheck source=/opt/fulfil/wifi-secrets.env
+	# shellcheck source=/opt/fulfil/lfp/wifi-secrets.env
 	. "$WIFI_SECRETS_FILE"
 else
 	echo "Missing $WIFI_SECRETS_FILE; skipping WiFi provisioning"
@@ -93,7 +93,7 @@ apt-get install -y apt-transport-https \
 	rsync \
 	rsyslog
 
-bash /opt/fulfil/ngrok_setup.sh
+bash /opt/fulfil/lfp/ngrok_setup.sh
 
 touch /etc/rsyslog.d/excluderover.conf
 echo "if \$programname contains \"lfp-core\" then stop" > /etc/rsyslog.d/excluderover.conf
@@ -181,7 +181,7 @@ for label in ${CONF_NODE_LABELS}; do
 	sed -i "s/--docker' \\\/--docker' \\\\\n\t'--node-label' ${label} \\\/g" /etc/systemd/system/k3s.service
 done
 
-FULFILDIR=/opt/fulfil/
+FULFILDIR=/opt/fulfil/lfp/
 
 # copy over necessary lfr files
 mkdir -p /home/usrFtp/code
@@ -210,18 +210,18 @@ echo "export currentlog=/home/usrFtp/code/log_\$(date "'+%Y-%m-%d'").txt" >> ~/.
 echo 'imx_rpmsg_tty' >> /etc/modules
 rm /etc/bluetooth/variscite-bt
 fw_setenv fdt_file imx8mn-var-som-fulfil-lfp.dtb 
-cp /opt/fulfil/lfp-core /home/usrFtp/code/
+cp /opt/fulfil/lfp/lfp-core /home/usrFtp/code/
 chmod +x /home/usrFtp/code/lfp-core
 
 # install ssh keys
 mkdir -p /root/.ssh/
-cp /opt/fulfil/authorized_keys /root/.ssh/
+cp /opt/fulfil/lfp/authorized_keys /root/.ssh/
 
 # Remove firstboot bootstrap script
 echo "Removing firstboot script..."
-rm /opt/fulfil/firstboot.sh
+rm /opt/fulfil/lfp/firstboot.sh
 rm /etc/systemd/system/multi-user.target.wants/fulfil-firstboot.service
-touch /opt/fulfil/firstboot.done
+touch /opt/fulfil/lfp/firstboot.done
 
 # Shutdown
 echo "Shutting down..."

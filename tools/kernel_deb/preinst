@@ -1,0 +1,26 @@
+#!/bin/bash
+set -euxo pipefail
+
+if ! [ -r /etc/os-release ]; then
+    echo "ERROR: Cannot determine OS (missing /etc/os-release)"
+    exit 1
+fi
+
+# Fail unless running on Debian
+# otherwise we'd install the debian OS onto ubuntu or something disasterous
+. /etc/os-release
+if [ "$ID" != "debian" ]; then
+    echo "ERROR: This install is for the Debian kernel. Detected a different OS: ID=$ID VERSION=$VERSION_ID"
+    exit 1
+fi
+
+# first remove any existing backup dir
+rm -rf /lib/modules_backup/
+rm -rf /boot_backup/
+
+# copy existing modules over as backup in case things don't go so well
+mkdir -p /lib/modules_backup/
+mkdir -p /boot_backup/
+
+mv /lib/modules/* /lib/modules_backup/
+cp -r /boot/* /boot_backup/

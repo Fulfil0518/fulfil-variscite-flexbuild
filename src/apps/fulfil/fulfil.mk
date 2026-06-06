@@ -6,41 +6,14 @@ $(APP_NAME): app-$(APP_NAME)
 app-$(APP_NAME):
 	@echo "Building $(APP_NAME) app..."
 	# 1. Create target directories in the staging RFS
-	install -d $(RFSDIR)/opt/fulfil
+	install -d $(RFSDIR)/opt/fulfil/lfp
 	install -d $(RFSDIR)/usr/local/sbin
 	install -d $(RFSDIR)/etc/systemd/system/multi-user.target.wants
 
 	# 2. Copy assets
 	@find "$(CURDIR)/fulfil/files" -mindepth 1 -print
-	cp -a $(CURDIR)/fulfil/files/* $(RFSDIR)/opt/fulfil/
+	cp -a $(CURDIR)/fulfil/files/* $(RFSDIR)/opt/fulfil/lfp/
 	
-	# 3. Install the firstboot script with executable permissions
-	install -m 0755 $(CURDIR)/fulfil/files/firstboot.sh \
-		$(RFSDIR)/usr/local/sbin/firstboot.sh
-
-	# 4. Install and enable the firstboot service
-	install -m 0644 $(CURDIR)/fulfil/files/fulfil-firstboot.service \
-		$(RFSDIR)/etc/systemd/system/fulfil-firstboot.service
-	
-	ln -sf /etc/systemd/system/fulfil-firstboot.service \
-		$(RFSDIR)/etc/systemd/system/multi-user.target.wants/fulfil-firstboot.service
-
-	# 5. Install and enable the camera service
-	install -m 0755 $(CURDIR)/fulfil/files/camera_install.sh \
-		$(RFSDIR)/opt/fulfil/camera_install.sh
-
-	install -m 0644 $(CURDIR)/fulfil/files/fulfil-camera-install.service \
-		$(RFSDIR)/etc/systemd/system/fulfil-camera-install.service
-
-	ln -sf /etc/systemd/system/fulfil-camera-install.service \
-		$(RFSDIR)/etc/systemd/system/multi-user.target.wants/fulfil-camera-install.service
-
-	# 6. Install the lfp-core service
-	install -m 0644 $(CURDIR)/fulfil/files/lfp-core.service \
-		$(RFSDIR)/etc/systemd/system/lfp-core.service
-	ln -sf /etc/systemd/system/lfp-core.service \
-		$(RFSDIR)/etc/systemd/system/multi-user.target.wants/lfp-core.service
-
-	# 7. Install OpenMV camera udev ignorelist (prevents FAT corruption on camera reset)
+	# 3. Install OpenMV camera udev ignorelist (prevents FAT corruption on camera reset)
 	install -d $(RFSDIR)/etc/udev/mount.ignorelist.d
 	echo "/dev/sda" > $(RFSDIR)/etc/udev/mount.ignorelist.d/openmv-camera
