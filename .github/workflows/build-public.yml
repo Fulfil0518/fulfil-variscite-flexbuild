@@ -39,7 +39,7 @@ jobs:
           - imx8mn-var-som
         rootfs:
           - server
-          - desktop
+          # - desktop
 
     steps:
       # GitHub-hosted runners expose additional space under /mnt.
@@ -61,10 +61,6 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Capture short commit SHA
-        id: short-sha
-        run: echo "value=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
       - name: Register QEMU for arm64
         uses: docker/setup-qemu-action@v3
@@ -237,13 +233,73 @@ jobs:
             bld -r debian:${{ matrix.rootfs }} -m ${{ matrix.machine }} -f ci.yml create-recovery-sdcard-image
           '
 
-      - name: Upload packaged recovery image
-        uses: actions/upload-artifact@v4
+      - name: Authenticate to GCS
+        uses: google-github-actions/auth@v3
         with:
-          name: debian-bookworm-6.6.52_24.12-${{ matrix.machine }}-${{ matrix.rootfs }}-${{ steps.short-sha.outputs.value }}
-          path: |
-            build_lsdk2412/images/var-recovery-image-${{ matrix.machine }}.img.zst
-            build_lsdk2412/images/var-recovery-image-${{ matrix.machine }}.img.bmap
-            build_lsdk2412/images/rootfs_lsdk2412_debian_${{ matrix.rootfs }}_arm64.tar.zst
-          if-no-files-found: error
-          retention-days: 90
+          credentials_json: ${{ secrets.GCS_SECRET }}
+
+      - name: Build GCS directory name
+        id: upload-dir
+        shell: bash
+        run: |
+          KERNEL_VERSION_NAME="${{ inputs.kernel_version_name }}"
+          KERNEL_COMMIT="${{ inputs.kernel_commit }}"
+          BUILD_TIMESTAMP="$(date -u +'%Y%m%dT%H%M%SZ')"
+
+          SAFE_KERNEL_VERSION_NAME="$(echo "$KERNEL_VERSION_NAME" | sed 's/[^A-Za-z0-9-]/-/g')"
+
+          DIR_NAME="${BUILD_TIMESTAMP}-${SAFE_KERNEL_VERSION_NAME}-${KERNEL_COMMIT}"
+
+          echo "value=$DIR_NAME" >> "$GITHUB_OUTPUT"
+          echo "GCS bucket dir: $DIR_NAME"
+
+      - name: Stage image files
+        run: |
+          mkdir -p upload
+          cp -L build_lsdk2412/images/rootfs_lsdk2412_debian_${{ matrix.rootfs }}_arm64.tar.zst \
+            upload/rootfs_lsdk2412_debian_${{ matrix.rootfs }}_arm64.tar.zst
+
+          cp -L build_lsdk2412/images/var-recovery-image-${{ matrix.machine }}.img.bmap \
+            upload/var-recovery-image-${{ matrix.machine }}.img.bmap
+
+          cp -L build_lsdk2412/images/var-recovery-image-${{ matrix.machine }}.img.zst \
+            upload/var-recovery-image-${{ matrix.machine }}.img.zst
+
+      - name: Upload recovery image to GCS
+        uses: google-github-actions/upload-cloud-storage@v3
+        with:
+          path: upload/
+          destination: varsom-debian-image/${{ steps.upload-dir.outputs.value }}/
+          parent: false
+
+      - name: Generate kernel debian package
+        run: |
+          docker exec "$CONTAINER_NAME" /bin/bash -c '
+            . setup.env || true
+            bld -r debian:${{ matrix.rootfs }} -m ${{ matrix.machine }} -f ci.yml kernel-deb
+          '
+
+      - name: Authenticate for Artifact Registry
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.ARTIFACT_REGISTRY_SECRET }}
+
+      - name: Upload to Artifact Registry
+        run: |
+          gcloud artifacts apt upload marsctl-staging \
+            --project=fulfil-web-staging-296222 \
+            --location=us \
+            --source=build_lsdk2412/imx8mn-debian-kernel.deb
+
+      - name: Show links
+        run: |
+          package_version=$(cat build_lsdk2412/imx8mn-debian-kernel-version)
+          echo "Built OS image can be found here:"
+          echo "https://console.cloud.google.com/storage/browser/varsom-debian-image/${{ steps.upload-dir.outputs.value }}"
+          echo ""
+          echo "Debian kernel package can be found here:"
+          echo "https://console.cloud.google.com/artifacts/apt/fulfil-web-staging-296222/us/marsctl-staging/imx8mn-debian-kernel/$package_version"
+          echo "and can be installed using:"
+          echo "apt-get install imx8mn-debian-kernel=$package_version"
+          echo "or"
+          echo "make kernel-swap LOCATION=[location] TARGET=[target] VERSION=$package_version"

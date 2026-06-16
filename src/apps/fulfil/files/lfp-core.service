@@ -1,6 +1,6 @@
 [Unit]
 Description=Rover LFP1 Core Firmware
-ConditionPathExists=/opt/fulfil/firstboot.done
+ConditionPathExists=/opt/fulfil/lfp/firstboot.done
 
 [Service]
 Type=simple

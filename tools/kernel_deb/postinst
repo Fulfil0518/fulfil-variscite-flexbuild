@@ -1,0 +1,10 @@
+#!/bin/bash
+set -euxo pipefail
+
+# the first dir in /lib/modules shows which version the kernel is now on
+cd /lib/modules
+KERNEL_VERSION=$(ls -d -- * | head -n 1)
+depmod -a $KERNEL_VERSION
+
+rm -rf /lib/modules_backup/
+rm -rf /boot_backup/

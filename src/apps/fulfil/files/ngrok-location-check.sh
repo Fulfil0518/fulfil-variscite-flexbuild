@@ -3,7 +3,7 @@
 # Exit 0 if device is on an allowed WiFi network, exit 1 otherwise.
 # Used as ExecCondition= for the ngrok systemd service.
 
-ALLOWED_SSIDS_FILE="/opt/fulfil/ngrok-allowed-ssids"
+ALLOWED_SSIDS_FILE="/opt/fulfil/lfp/ngrok-allowed-ssids"
 
 # Fail-open if no allow-list file exists (backward compat)
 if [ ! -f "$ALLOWED_SSIDS_FILE" ]; then

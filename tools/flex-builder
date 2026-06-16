@@ -365,6 +365,12 @@ create_recovery_sdcard_image_add_installer() {
 		return 1
 	fi
 
+	cp "$FBDIR/tools/install_lfp.sh" "$ROOTFS_DIR/usr/bin/install_lfp.sh"
+	cp "$FBDIR/tools/install_mars.sh" "$ROOTFS_DIR/usr/bin/install_mars.sh"
+
+	chmod +x "$ROOTFS_DIR/usr/bin/install_lfp.sh"
+	chmod +x "$ROOTFS_DIR/usr/bin/install_mars.sh"
+
 	# Copy bootloader and rootfs files to image directory
 	cp "$FLASH_BIN" "$ROOTFS_DIR/opt/images/Debian/${INSTALL_DEBIAN_TARGET_BOOT}"
 	cp "$ROOTFS_FILE" "$ROOTFS_DIR/opt/images/Debian/${INSTALL_DEBIAN_TARGET_ROOTFS}"
@@ -1267,6 +1273,8 @@ case "$1" in
 	merge_bootpart_rfs; exit;;
     create-recovery-sdcard-image)
 	create_recovery_sdcard_image; exit;;
+    kernel-deb)
+	generate_kernel_deb; exit;;
     host-dep)
 	check_host_dependent_pkg; exit;;
     list)

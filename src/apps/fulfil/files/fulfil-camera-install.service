@@ -1,6 +1,6 @@
 [Unit]
 Description=Camera Install Script
-ConditionPathExists=/opt/fulfil/camera_install.sh
+ConditionPathExists=/opt/fulfil/lfp/camera_install.sh
 Wants=network-online.target
 After=network-online.target
 
@@ -9,5 +9,5 @@ After=network-online.target
 EnvironmentFile=/etc/environment
 Type=oneshot
 ExecStartPre=/bin/sleep 100
-ExecStart=/opt/fulfil/camera_install.sh
+ExecStart=/opt/fulfil/lfp/camera_install.sh
 TimeoutSec=300

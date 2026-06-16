@@ -137,3 +137,61 @@ generate_bootpartition_tarball() {
 
     fbprint_d $FBOUTDIR/images/$boottarball.tar.zst
 }
+
+generate_kernel_deb() {
+    deb_pkg_dir="$FBOUTDIR/kernel_deb"
+    metadata_dir="$deb_pkg_dir/DEBIAN"
+    boot_dir="$deb_pkg_dir/boot"
+    modules_dir="$deb_pkg_dir/lib/modules"
+
+    rm -rf "$deb_pkg_dir"
+
+    mkdir -p "$metadata_dir"
+    mkdir -p "$boot_dir"
+    mkdir -p "$modules_dir"
+
+    # check kernel image
+    [ -f $KERNEL_PATH/Makefile ] || bld repo-fetch linux
+    curbrch=`cd $KERNEL_PATH && git branch | grep ^* | cut -d' ' -f2`
+    [ ! -f $kernel_img -o ! -f $KERNEL_OUTPUT_PATH/$curbrch/include/config/kernel.release ] && \
+    echo Building the dependent $kernel_img ... && \
+    bld linux -p $SOCFAMILY -a $DESTARCH
+
+    bld linux-modules -p $SOCFAMILY -a $DESTARCH
+
+    fbprint_n "Installing kernel and dtb ..."
+    kernelrelease=$(cat $KERNEL_OUTPUT_PATH/$curbrch/include/config/kernel.release)
+    cp -f $FBOUTDIR/linux/kernel/$DESTARCH/$SOCFAMILY/{*.dtb,Image*,config-$kernelrelease} $boot_dir
+
+    # install kernel modules
+    fbprint_n "Installing kernel modules ..."
+    cp -rf "$KERNEL_OUTPUT_PATH/$curbrch/tmp/lib/modules/." "$modules_dir/"
+    modversion=$(ls $KERNEL_OUTPUT_PATH/$curbrch/tmp/lib/modules|xargs echo|cut -d' ' -f1)
+    rm -f "$modules_dir/$modversion/"{build,source}
+
+    # install all the debian package metadata and pre/post operations
+    fbprint_n "Installing debian package metadata ..."
+    cp "$FBDIR/tools/kernel_deb/preinst" "$metadata_dir/preinst"
+    cp "$FBDIR/tools/kernel_deb/postinst" "$metadata_dir/postinst"
+    cp "$FBDIR/tools/kernel_deb/prerm" "$metadata_dir/prerm"
+
+    chmod 0755 "$metadata_dir/preinst"
+    chmod 0755 "$metadata_dir/postinst"
+    chmod 0755 "$metadata_dir/prerm"
+
+    cat > "$metadata_dir/control" <<EOF
+Package: imx8mn-debian-kernel
+Version: 0+$kernelrelease
+Maintainer: Firmware Team
+Section: misc
+Priority: optional
+Architecture: arm64
+Description: Fulfil Firmware team Debian kernel for imx8mn var som
+EOF
+
+    dpkg-deb --root-owner-group -Zxz --build "$deb_pkg_dir" "$FBOUTDIR/imx8mn-debian-kernel.deb"
+
+    echo "0+$kernelrelease" > "$FBOUTDIR/imx8mn-debian-kernel-version"
+
+    rm -rf "$deb_pkg_dir"
+}

@@ -33,7 +33,7 @@ apt install -y ngrok
 echo "[2/5] Copy ngrok service config to ${NGROK_CONFIG_PATH}"
 
 mkdir -p "$(dirname "${NGROK_CONFIG_PATH}")"
-cp /opt/fulfil/ngrok.yml "${NGROK_CONFIG_PATH}"
+cp /opt/fulfil/lfp/ngrok.yml "${NGROK_CONFIG_PATH}"
 
 
 echo "[3/5] Installing ngrok as a service (idempotent)"
@@ -46,7 +46,7 @@ fi
 
 echo "[4/5] Adding location guard to ngrok service"
 
-install -m 0755 /opt/fulfil/ngrok-location-check.sh /usr/local/sbin/ngrok-location-check.sh
+install -m 0755 /opt/fulfil/lfp/ngrok-location-check.sh /usr/local/sbin/ngrok-location-check.sh
 
 mkdir -p /etc/systemd/system/ngrok.service.d
 cat > /etc/systemd/system/ngrok.service.d/location-guard.conf <<'EOF'
