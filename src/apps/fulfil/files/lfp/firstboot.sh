@@ -149,8 +149,6 @@ adduser --disabled-password --gecos "" fulfil && \
 	mkdir -p /home/usrFtp/code && \
 	chmod u+rw /home/usrFtp/code/ && \
 	chown -R fulfil: /home/usrFtp/code/
-	
-yes FreshEngr | passwd root
 
 # set up dummy network so k3s can boot without networking
 # see https://docs.k3s.io/installation/airgap
@@ -212,10 +210,6 @@ rm /etc/bluetooth/variscite-bt
 fw_setenv fdt_file imx8mn-var-som-fulfil-lfp.dtb 
 cp /opt/fulfil/lfp/lfp-core /home/usrFtp/code/
 chmod +x /home/usrFtp/code/lfp-core
-
-# install ssh keys
-mkdir -p /root/.ssh/
-cp /opt/fulfil/lfp/authorized_keys /root/.ssh/
 
 # Remove firstboot bootstrap script
 echo "Removing firstboot script..."

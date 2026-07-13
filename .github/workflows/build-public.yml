@@ -173,15 +173,23 @@ jobs:
       - name: Decrypt SOPS files
         run: |
           set -euo pipefail
-          for src in src/apps/fulfil/secrets/*.sops; do
-            [ -e "$src" ] || continue
 
-            base="$(basename "$src" .sops)"
-            dst="src/apps/fulfil/files/$base"
+          for dir in lfp common; do
+            src_dir="src/apps/fulfil/secrets/$dir"
+            dst_dir="src/apps/fulfil/files/$dir"
 
-            echo "Decrypting $src -> $dst"
-            sops -d --input-type binary "$src" > "$dst"
-            chmod 600 "$dst"
+            mkdir -p "$dst_dir"
+
+            for src in "$src_dir"/*.sops; do
+              [ -e "$src" ] || continue
+
+              base="$(basename "$src" .sops)"
+              dst="$dst_dir/$base"
+
+              echo "Decrypting $src -> $dst"
+              sops -d --input-type binary "$src" > "$dst"
+              chmod 600 "$dst"
+            done
           done
 
       - name: Build U-Boot
