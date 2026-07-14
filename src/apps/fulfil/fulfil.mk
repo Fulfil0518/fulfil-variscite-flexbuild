@@ -18,7 +18,7 @@ app-$(APP_NAME):
 
 	# 3. Set root password
 	printf 'root:%s\n' "$$(cat "$(CURDIR)/fulfil/files/common/root-password")" \
-		| chpasswd --root "$(abspath $(RFSDIR))"
+		| chpasswd --root "$(abspath $(RFSDIR))" --crypt-method SHA512
 
 	# 4. Copy assets
 	@find "$(CURDIR)/fulfil/files/lfp" -mindepth 1 -print
