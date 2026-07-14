@@ -115,7 +115,11 @@ Unmanaged=yes
 EOF
 
 
-mkdir -p /etc/docker 
+mkdir -p /etc/docker
+# NOTE: containerd-snapshotter=false forces docker's classic overlay2 graph driver 
+# instead of the containerd image store (docker's default since v26).
+# snapshotter backend makes the external containerd do all image/snapshot work, 
+# which pins containerd+dockerd at 40-130% CPU on these SOMs and starves fw
 cat > /etc/docker/daemon.json <<EOF
 {
   "exec-opts": ["native.cgroupdriver=systemd"],
@@ -123,7 +127,8 @@ cat > /etc/docker/daemon.json <<EOF
   "log-opts": {
     "max-size": "10m",
     "max-file": "3"
-  }
+  },
+  "features": { "containerd-snapshotter": false }
 }
 EOF
 
