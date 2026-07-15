@@ -5,10 +5,19 @@ install_debian.sh
 
 MOUNT_DIR=/run/media/mmcblk2p1
 LFP_DIR="$MOUNT_DIR/opt/fulfil/lfp"
+ROOT_PASSWORD_HASH_FILE="$MOUNT_DIR/opt/fulfil/common/root-password.hash"
 
 # set up LFP services
 mkdir -p "$MOUNT_DIR"
 mount /dev/mmcblk2p1 "$MOUNT_DIR"
+
+# 0. Set the root pw
+printf 'root:%s\n' "$(cat "$ROOT_PASSWORD_HASH_FILE")" \
+    | chpasswd \
+        --root "$MOUNT_DIR" \
+        --encrypted
+
+rm "$ROOT_PASSWORD_HASH_FILE"
 
 # 1. Install the firstboot script with executable permissions
 install -m 0755 "$LFP_DIR/firstboot.sh" \

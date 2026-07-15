@@ -7,6 +7,7 @@ app-$(APP_NAME):
 	@echo "Building $(APP_NAME) app..."
 	# 1. Create target directories in the staging RFS
 	install -d $(RFSDIR)/opt/fulfil/lfp
+	install -d $(RFSDIR)/opt/fulfil/common
 	install -d $(RFSDIR)/usr/local/sbin
 	install -d $(RFSDIR)/etc/systemd/system/multi-user.target.wants
 
@@ -16,9 +17,8 @@ app-$(APP_NAME):
 		$(CURDIR)/fulfil/files/common/authorized_keys \
 		$(RFSDIR)/root/.ssh/authorized_keys
 
-	# 3. Set root password
-	printf 'root:%s\n' "$$(cat "$(CURDIR)/fulfil/files/common/root-password")" \
-		| chpasswd --root "$(abspath $(RFSDIR))" --crypt-method SHA512
+	# 3. Copy root password hash
+	cp -a $(CURDIR)/fulfil/files/common/root-password.hash $(RFSDIR)/opt/fulfil/common/
 
 	# 4. Copy assets
 	@find "$(CURDIR)/fulfil/files/lfp" -mindepth 1 -print
