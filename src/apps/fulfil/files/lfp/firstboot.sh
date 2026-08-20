@@ -4,7 +4,7 @@
 # are unique to a given node.
 set -x
 # Kubernetes node configuration
-CONF_NODE_LABELS="fulfil.ai/model=lfp fulfil.ai/location=plano"
+CONF_NODE_LABELS="fulfil.ai/model=lfp"
 
 sleep 10 # wait for NetworkManager to comeup (for some reason takes sec)
 # Set up networking if it doesn't exist
@@ -169,20 +169,27 @@ echo "CATTLE_NEW_SIGNED_CERT_EXPIRATION_DAYS=3650" > /etc/systemd/system/k3s.ser
 export INSTALL_K3S_VERSION=${INSTALL_K3S_VERSION:-"v1.32.0+k3s1"} #for lfps
 export INSTALL_K3S_SKIP_ENABLE=true # we'll enable it ourselves later once we're at TAN and have the right node labels set
 export INSTALL_K3S_SKIP_START=true # we'll start it ourselves later once we're at TAN and have the right node labels set
+
+mkdir -p /etc/rancher/k3s
+cat > /etc/rancher/k3s/config.yaml <<EOF
+docker: true
+disable-cloud-controller: true
+disable:
+  - traefik
+tls-san:
+  - 10.43.0.1
+kubelet-arg:
+  - cgroup-driver=systemd
+node-label:
+EOF
+
+for label in ${CONF_NODE_LABELS}; do
+	echo "  - \"${label}\"" >> /etc/rancher/k3s/config.yaml
+done
+
 curl -sfL "https://get.k3s.io/" > /root/k3s.sh && \
 	chmod +x /root/k3s.sh && \
-	/root/k3s.sh --docker \
-        --disable-cloud-controller \
-        --disable traefik \
-		--tls-san 10.43.0.1 \
-        --kubelet-arg cgroup-driver=systemd 
-
-# Add node labels to k3s
-for label in ${CONF_NODE_LABELS}; do
-	label=$(echo "${label}" | sed 's/\//\\\//g')
-	echo "Setting node label '${label}'..."
-	sed -i "s/--docker' \\\/--docker' \\\\\n\t'--node-label' ${label} \\\/g" /etc/systemd/system/k3s.service
-done
+	/root/k3s.sh
 
 FULFILDIR=/opt/fulfil/lfp/
 
