@@ -206,6 +206,7 @@ mkdir -p /var/lib/rancher/k3s/server/manifests
 cp ${FULFILDIR}/namespace.yaml /var/lib/rancher/k3s/server/manifests/0-namespace.yaml
 cp ${FULFILDIR}/serviceaccount.yaml /var/lib/rancher/k3s/server/manifests/1-serviceaccount.yaml
 cp ${FULFILDIR}/deployment.yaml /var/lib/rancher/k3s/server/manifests/3-deployment.yaml
+cp ${FULFILDIR}/node-exporter.yaml /var/lib/rancher/k3s/server/manifests/5-node-exporter.yaml
 
 # note these three lines require secrets which you'll have to create and put in the scripts/manifests directory
 cp ${FULFILDIR}/rover-gcr-secret.yaml /var/lib/rancher/k3s/server/manifests/2-gcr-key.yaml
