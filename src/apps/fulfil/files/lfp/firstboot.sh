@@ -162,9 +162,6 @@ ip link set dummy0 up
 ip addr add 203.0.113.254/31 dev dummy0
 ip route add default via 203.0.113.255 dev dummy0 metric 1000
 
-# Set k3s cert expiration to 10 years
-echo "CATTLE_NEW_SIGNED_CERT_EXPIRATION_DAYS=3650" > /etc/systemd/system/k3s.service.env
-
 # In today's things that make me very sad
 export INSTALL_K3S_VERSION=${INSTALL_K3S_VERSION:-"v1.32.0+k3s1"} #for lfps
 export INSTALL_K3S_SKIP_ENABLE=true # we'll enable it ourselves later once we're at TAN and have the right node labels set
@@ -190,6 +187,9 @@ done
 curl -sfL "https://get.k3s.io/" > /root/k3s.sh && \
 	chmod +x /root/k3s.sh && \
 	/root/k3s.sh
+
+# Set k3s cert expiration to 10 years
+echo "CATTLE_NEW_SIGNED_CERT_EXPIRATION_DAYS=3650" > /etc/systemd/system/k3s.service.env
 
 FULFILDIR=/opt/fulfil/lfp/
 
